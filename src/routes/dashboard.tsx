@@ -16,13 +16,21 @@ export const Route = createFileRoute("/dashboard")({
   }),
 });
 
-const navItems = [
+type NavItem = {
+  to: "/new" | "/dashboard" | "/dashboard/history" | "/dashboard/saved" | "/dashboard/settings";
+  label: string;
+  icon: typeof Plus;
+  primary?: boolean;
+  exact?: boolean;
+};
+
+const navItems: NavItem[] = [
   { to: "/new", label: "New Analysis", icon: Plus, primary: true },
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/dashboard/history", label: "History", icon: History },
   { to: "/dashboard/saved", label: "Saved Reports", icon: Bookmark },
   { to: "/dashboard/settings", label: "Settings", icon: Settings },
-] as const;
+];
 
 function DashboardLayout() {
   const { theme, toggle } = useTheme();
