@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as NewRouteImport } from './routes/new'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
@@ -18,6 +19,11 @@ import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settin
 import { Route as DashboardSavedRouteImport } from './routes/dashboard.saved'
 import { Route as DashboardHistoryRouteImport } from './routes/dashboard.history'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NewRoute = NewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/new': typeof NewRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard/history': typeof DashboardHistoryRoute
   '/dashboard/saved': typeof DashboardSavedRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/new': typeof NewRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard/history': typeof DashboardHistoryRoute
   '/dashboard/saved': typeof DashboardSavedRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/new': typeof NewRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard/history': typeof DashboardHistoryRoute
   '/dashboard/saved': typeof DashboardSavedRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/new'
+    | '/sitemap.xml'
     | '/dashboard/history'
     | '/dashboard/saved'
     | '/dashboard/settings'
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/new'
+    | '/sitemap.xml'
     | '/dashboard/history'
     | '/dashboard/saved'
     | '/dashboard/settings'
@@ -114,6 +125,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/new'
+    | '/sitemap.xml'
     | '/dashboard/history'
     | '/dashboard/saved'
     | '/dashboard/settings'
@@ -125,11 +137,19 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   NewRoute: typeof NewRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ResultsIdRoute: typeof ResultsIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/new': {
       id: '/new'
       path: '/new'
@@ -211,8 +231,19 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRouteWithChildren,
   NewRoute: NewRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ResultsIdRoute: ResultsIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
