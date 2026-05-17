@@ -25,12 +25,41 @@ export const Route = createFileRoute("/new")({
 });
 
 const STAGES = [
-  "Uploading resume…",
-  "Parsing job description…",
-  "Running AI ATS analysis…",
-  "Generating optimized resume…",
-  "Finalizing report…",
+  "Uploading resume...",
+  "Extracting resume data...",
+  "Fetching job requirements...",
+  "Running AI skill analysis...",
+  "Generating ATS score...",
+  "Creating modified resume...",
 ];
+
+const DOMAINS = [
+  "Frontend",
+  "Backend",
+  "Full Stack",
+  "AI/ML",
+  "Data Science",
+  "DevOps",
+  "Cybersecurity",
+];
+
+const ROLE_LABELS: Record<string, string> = {
+  internship: "Internship",
+  fulltime: "Full-Time Job",
+  placement: "Placement Drive",
+};
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result.split(",")[1] ?? result);
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
 
 function NewAnalysis() {
   const navigate = useNavigate();
@@ -39,8 +68,10 @@ function NewAnalysis() {
   const [jobUrl, setJobUrl] = useState("");
   const [jobDesc, setJobDesc] = useState("");
   const [role, setRole] = useState("internship");
+  const [domain, setDomain] = useState("Frontend");
   const [loading, setLoading] = useState(false);
   const [stage, setStage] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
 
   const handleFile = (f: File | null) => {
@@ -63,6 +94,7 @@ function NewAnalysis() {
 
     setLoading(true);
     setStage(0);
+    setError(null);
     const stageTimer = setInterval(() => {
       setStage((s) => Math.min(s + 1, STAGES.length - 1));
     }, 900);
@@ -73,15 +105,29 @@ function NewAnalysis() {
       const jobTitle = jobUrl || jobDesc.slice(0, 60) || "Untitled role";
 
       if (webhook) {
-        const form = new FormData();
-        form.append("resume", file);
-        form.append("jobUrl", jobUrl);
-        form.append("jobDescription", jobDesc);
-        form.append("roleType", role);
+        const resumeBase64 = await fileToBase64(file);
+        const payload = {
+          resumeFile: {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            base64: resumeBase64,
+          },
+          jobUrl,
+          jobDescription: jobDesc,
+          roleType: ROLE_LABELS[role] ?? role,
+          domain,
+          timestamp: new Date().toISOString(),
+        };
 
-        const res = await fetch(webhook, { method: "POST", body: form });
+        const res = await fetch(webhook, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
         if (!res.ok) throw new Error(`Webhook error ${res.status}`);
-        result = await res.json();
+        const raw = await res.json();
+        result = (Array.isArray(raw) ? raw[0] : raw) as AnalysisResponse;
       } else {
         await new Promise((r) => setTimeout(r, 4500));
         result = mockAnalysis(jobTitle);
@@ -102,8 +148,10 @@ function NewAnalysis() {
       navigate({ to: "/results/$id", params: { id } });
     } catch (e) {
       clearInterval(stageTimer);
+      const msg = e instanceof Error ? e.message : "Analysis failed. Please try again.";
+      setError(msg);
       setLoading(false);
-      toast.error(e instanceof Error ? e.message : "Analysis failed");
+      toast.error("Analysis failed. Please try again.");
     }
   };
 
@@ -197,20 +245,40 @@ function NewAnalysis() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Role Type</Label>
-              <Select value={role} onValueChange={setRole}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="internship">Internship</SelectItem>
-                  <SelectItem value="fulltime">Full-Time Job</SelectItem>
-                  <SelectItem value="placement">Placement Drive</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Role Type</Label>
+                <Select value={role} onValueChange={setRole}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="internship">Internship</SelectItem>
+                    <SelectItem value="fulltime">Full-Time Job</SelectItem>
+                    <SelectItem value="placement">Placement Drive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Domain</Label>
+                <Select value={domain} onValueChange={setDomain}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {DOMAINS.map((d) => (
+                      <SelectItem key={d} value={d}>{d}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
+            {error && (
+              <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm">
+                <p className="font-medium text-destructive">Analysis failed. Please try again.</p>
+                <p className="mt-1 text-xs text-muted-foreground">{error}</p>
+              </div>
+            )}
+
             <Button onClick={submit} variant="hero" size="lg" className="w-full">
-              <Sparkles className="h-4 w-4" /> Analyze Placement Readiness
+              <Sparkles className="h-4 w-4" /> {error ? "Retry Analysis" : "Analyze Placement Readiness"}
             </Button>
           </div>
         </Card>
@@ -227,8 +295,8 @@ function LoadingState({ stage }: { stage: number }) {
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow animate-pulse-glow">
           <Loader2 className="h-7 w-7 animate-spin text-primary-foreground" />
         </div>
-        <h2 className="mt-6 font-display text-2xl font-bold">Analyzing your resume…</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Our AI is processing your placement readiness report.</p>
+        <h2 className="mt-6 font-display text-2xl font-bold">Analyzing your resume using AI...</h2>
+        <p className="mt-2 text-sm text-muted-foreground">Our AI agent is processing your placement readiness report.</p>
         <ul className="mt-8 space-y-3 text-left">
           {STAGES.map((s, i) => (
             <li key={s} className="flex items-center gap-3 text-sm">
