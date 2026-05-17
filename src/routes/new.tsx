@@ -295,8 +295,8 @@ function LoadingState({ stage }: { stage: number }) {
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow animate-pulse-glow">
           <Loader2 className="h-7 w-7 animate-spin text-primary-foreground" />
         </div>
-        <h2 className="mt-6 font-display text-2xl font-bold">Analyzing your resume…</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Our AI is processing your placement readiness report.</p>
+        <h2 className="mt-6 font-display text-2xl font-bold">Analyzing your resume using AI...</h2>
+        <p className="mt-2 text-sm text-muted-foreground">Our AI agent is processing your placement readiness report.</p>
         <ul className="mt-8 space-y-3 text-left">
           {STAGES.map((s, i) => (
             <li key={s} className="flex items-center gap-3 text-sm">
