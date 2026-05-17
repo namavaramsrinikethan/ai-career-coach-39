@@ -94,6 +94,7 @@ function NewAnalysis() {
 
     setLoading(true);
     setStage(0);
+    setError(null);
     const stageTimer = setInterval(() => {
       setStage((s) => Math.min(s + 1, STAGES.length - 1));
     }, 900);
@@ -104,15 +105,29 @@ function NewAnalysis() {
       const jobTitle = jobUrl || jobDesc.slice(0, 60) || "Untitled role";
 
       if (webhook) {
-        const form = new FormData();
-        form.append("resume", file);
-        form.append("jobUrl", jobUrl);
-        form.append("jobDescription", jobDesc);
-        form.append("roleType", role);
+        const resumeBase64 = await fileToBase64(file);
+        const payload = {
+          resumeFile: {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            base64: resumeBase64,
+          },
+          jobUrl,
+          jobDescription: jobDesc,
+          roleType: ROLE_LABELS[role] ?? role,
+          domain,
+          timestamp: new Date().toISOString(),
+        };
 
-        const res = await fetch(webhook, { method: "POST", body: form });
+        const res = await fetch(webhook, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
         if (!res.ok) throw new Error(`Webhook error ${res.status}`);
-        result = await res.json();
+        const raw = await res.json();
+        result = (Array.isArray(raw) ? raw[0] : raw) as AnalysisResponse;
       } else {
         await new Promise((r) => setTimeout(r, 4500));
         result = mockAnalysis(jobTitle);
@@ -133,8 +148,10 @@ function NewAnalysis() {
       navigate({ to: "/results/$id", params: { id } });
     } catch (e) {
       clearInterval(stageTimer);
+      const msg = e instanceof Error ? e.message : "Analysis failed. Please try again.";
+      setError(msg);
       setLoading(false);
-      toast.error(e instanceof Error ? e.message : "Analysis failed");
+      toast.error("Analysis failed. Please try again.");
     }
   };
 
