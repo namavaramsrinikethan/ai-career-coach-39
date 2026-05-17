@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { getWebhookUrl, saveHistoryItem } from "@/lib/storage";
 import type { AnalysisResponse, HistoryItem } from "@/lib/types";
 import { mockAnalysis } from "@/lib/mock";
+import { normalizeWebhookResponse } from "@/lib/normalize";
 
 export const Route = createFileRoute("/new")({
   component: NewAnalysis,
