@@ -3,7 +3,7 @@ import type { HistoryItem } from "./types";
 const HISTORY_KEY = "apr_history_v1";
 const WEBHOOK_KEY = "apr_webhook_url";
 export const DEFAULT_WEBHOOK_URL =
-  "http://localhost:5678/webhook-test/ac971683-7629-4cf2-bae4-ff06db503878";
+  "https://tracing-structure-average.ngrok-free.dev/webhook/ac971683-7629-4cf2-bae4-ff06db503878";
 
 export const getHistory = (): HistoryItem[] => {
   if (typeof window === "undefined") return [];
