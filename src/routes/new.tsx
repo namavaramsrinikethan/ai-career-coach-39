@@ -25,12 +25,41 @@ export const Route = createFileRoute("/new")({
 });
 
 const STAGES = [
-  "Uploading resume…",
-  "Parsing job description…",
-  "Running AI ATS analysis…",
-  "Generating optimized resume…",
-  "Finalizing report…",
+  "Uploading resume...",
+  "Extracting resume data...",
+  "Fetching job requirements...",
+  "Running AI skill analysis...",
+  "Generating ATS score...",
+  "Creating modified resume...",
 ];
+
+const DOMAINS = [
+  "Frontend",
+  "Backend",
+  "Full Stack",
+  "AI/ML",
+  "Data Science",
+  "DevOps",
+  "Cybersecurity",
+];
+
+const ROLE_LABELS: Record<string, string> = {
+  internship: "Internship",
+  fulltime: "Full-Time Job",
+  placement: "Placement Drive",
+};
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result.split(",")[1] ?? result);
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
 
 function NewAnalysis() {
   const navigate = useNavigate();
