@@ -103,6 +103,7 @@ function NewAnalysis() {
     try {
       const webhook = getWebhookUrl();
       let result: AnalysisResponse;
+      let rawResponse: unknown = null;
       const jobTitle = jobUrl || jobDesc.slice(0, 60) || "Untitled role";
 
       if (webhook) {
@@ -127,11 +128,13 @@ function NewAnalysis() {
           body: JSON.stringify(payload),
         });
         if (!res.ok) throw new Error(`Webhook error ${res.status}`);
-        const raw = await res.json();
-        result = (Array.isArray(raw) ? raw[0] : raw) as AnalysisResponse;
+        const text = await res.text();
+        try { rawResponse = JSON.parse(text); } catch { rawResponse = text; }
+        result = normalizeWebhookResponse(rawResponse);
       } else {
         await new Promise((r) => setTimeout(r, 4500));
         result = mockAnalysis(jobTitle);
+        rawResponse = result;
         toast.info("Showing demo analysis. Configure your n8n webhook in Settings to use real AI.");
       }
 
@@ -143,6 +146,7 @@ function NewAnalysis() {
         jobTitle,
         atsScore: Number(result.atsScore) || 0,
         result,
+        rawResponse,
       };
       saveHistoryItem(item);
       clearInterval(stageTimer);
