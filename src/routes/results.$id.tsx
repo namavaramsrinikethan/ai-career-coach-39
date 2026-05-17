@@ -96,17 +96,19 @@ function Results() {
 
         {/* Tabs */}
         <Tabs defaultValue="resume" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
             <TabsTrigger value="resume"><Sparkles className="mr-1 h-3.5 w-3.5" />AI Resume</TabsTrigger>
             <TabsTrigger value="skills"><Target className="mr-1 h-3.5 w-3.5" />Skills</TabsTrigger>
             <TabsTrigger value="projects"><Code2 className="mr-1 h-3.5 w-3.5" />Projects</TabsTrigger>
             <TabsTrigger value="roadmap"><GraduationCap className="mr-1 h-3.5 w-3.5" />Roadmap</TabsTrigger>
+            <TabsTrigger value="raw"><Braces className="mr-1 h-3.5 w-3.5" />Raw</TabsTrigger>
           </TabsList>
 
           <TabsContent value="resume" className="mt-6"><AiResumeSection r={r} /></TabsContent>
           <TabsContent value="skills" className="mt-6"><SkillsSection r={r} /></TabsContent>
           <TabsContent value="projects" className="mt-6"><ProjectsSection r={r} /></TabsContent>
           <TabsContent value="roadmap" className="mt-6"><RoadmapSection r={r} /></TabsContent>
+          <TabsContent value="raw" className="mt-6"><RawSection raw={item.rawResponse ?? item.result} /></TabsContent>
         </Tabs>
       </div>
     </div>
