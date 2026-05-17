@@ -245,20 +245,40 @@ function NewAnalysis() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Role Type</Label>
-              <Select value={role} onValueChange={setRole}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="internship">Internship</SelectItem>
-                  <SelectItem value="fulltime">Full-Time Job</SelectItem>
-                  <SelectItem value="placement">Placement Drive</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Role Type</Label>
+                <Select value={role} onValueChange={setRole}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="internship">Internship</SelectItem>
+                    <SelectItem value="fulltime">Full-Time Job</SelectItem>
+                    <SelectItem value="placement">Placement Drive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Domain</Label>
+                <Select value={domain} onValueChange={setDomain}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {DOMAINS.map((d) => (
+                      <SelectItem key={d} value={d}>{d}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
+            {error && (
+              <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm">
+                <p className="font-medium text-destructive">Analysis failed. Please try again.</p>
+                <p className="mt-1 text-xs text-muted-foreground">{error}</p>
+              </div>
+            )}
+
             <Button onClick={submit} variant="hero" size="lg" className="w-full">
-              <Sparkles className="h-4 w-4" /> Analyze Placement Readiness
+              <Sparkles className="h-4 w-4" /> {error ? "Retry Analysis" : "Analyze Placement Readiness"}
             </Button>
           </div>
         </Card>
