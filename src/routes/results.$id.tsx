@@ -115,6 +115,28 @@ function Results() {
   );
 }
 
+function RawSection({ raw }: { raw: unknown }) {
+  const text = typeof raw === "string" ? raw : JSON.stringify(raw, null, 2);
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(text); toast.success("Copied raw response"); }
+    catch { toast.error("Copy failed"); }
+  };
+  return (
+    <Card className="border-border/60 bg-gradient-card">
+      <div className="flex items-center justify-between border-b border-border/60 px-5 py-3">
+        <div>
+          <p className="font-display text-sm font-semibold">Raw Webhook Response</p>
+          <p className="text-xs text-muted-foreground">Exactly what your n8n "Respond to Webhook" node returned</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={copy}><Copy className="h-3.5 w-3.5" /> Copy</Button>
+      </div>
+      <pre className="max-h-[640px] overflow-auto p-5 font-mono text-xs leading-relaxed text-muted-foreground whitespace-pre-wrap break-all">
+        {text || "No response captured."}
+      </pre>
+    </Card>
+  );
+}
+
 function CircularScore({ value, label, accent = "primary" }: { value: number; label: string; accent?: "primary" | "secondary" }) {
   const radius = 70;
   const c = 2 * Math.PI * radius;
