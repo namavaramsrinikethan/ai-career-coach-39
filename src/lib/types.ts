@@ -37,5 +37,6 @@ export interface HistoryItem {
   jobTitle: string;
   atsScore: number;
   result: AnalysisResponse;
+  rawResponse?: unknown;
   saved?: boolean;
 }

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, Download, Sparkles, Target, BookOpen, Code2, CheckCircle2, XCircle,
-  ExternalLink, FileText, Lightbulb, GraduationCap, AlertTriangle, Circle,
+  ExternalLink, FileText, Lightbulb, GraduationCap, AlertTriangle, Circle, Braces, Copy,
 } from "lucide-react";
 import { getHistoryItem } from "@/lib/storage";
 import type { AnalysisResponse, HistoryItem } from "@/lib/types";
@@ -96,20 +96,44 @@ function Results() {
 
         {/* Tabs */}
         <Tabs defaultValue="resume" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
             <TabsTrigger value="resume"><Sparkles className="mr-1 h-3.5 w-3.5" />AI Resume</TabsTrigger>
             <TabsTrigger value="skills"><Target className="mr-1 h-3.5 w-3.5" />Skills</TabsTrigger>
             <TabsTrigger value="projects"><Code2 className="mr-1 h-3.5 w-3.5" />Projects</TabsTrigger>
             <TabsTrigger value="roadmap"><GraduationCap className="mr-1 h-3.5 w-3.5" />Roadmap</TabsTrigger>
+            <TabsTrigger value="raw"><Braces className="mr-1 h-3.5 w-3.5" />Raw</TabsTrigger>
           </TabsList>
 
           <TabsContent value="resume" className="mt-6"><AiResumeSection r={r} /></TabsContent>
           <TabsContent value="skills" className="mt-6"><SkillsSection r={r} /></TabsContent>
           <TabsContent value="projects" className="mt-6"><ProjectsSection r={r} /></TabsContent>
           <TabsContent value="roadmap" className="mt-6"><RoadmapSection r={r} /></TabsContent>
+          <TabsContent value="raw" className="mt-6"><RawSection raw={item.rawResponse ?? item.result} /></TabsContent>
         </Tabs>
       </div>
     </div>
+  );
+}
+
+function RawSection({ raw }: { raw: unknown }) {
+  const text = typeof raw === "string" ? raw : JSON.stringify(raw, null, 2);
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(text); toast.success("Copied raw response"); }
+    catch { toast.error("Copy failed"); }
+  };
+  return (
+    <Card className="border-border/60 bg-gradient-card">
+      <div className="flex items-center justify-between border-b border-border/60 px-5 py-3">
+        <div>
+          <p className="font-display text-sm font-semibold">Raw Webhook Response</p>
+          <p className="text-xs text-muted-foreground">Exactly what your n8n "Respond to Webhook" node returned</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={copy}><Copy className="h-3.5 w-3.5" /> Copy</Button>
+      </div>
+      <pre className="max-h-[640px] overflow-auto p-5 font-mono text-xs leading-relaxed text-muted-foreground whitespace-pre-wrap break-all">
+        {text || "No response captured."}
+      </pre>
+    </Card>
   );
 }
 
