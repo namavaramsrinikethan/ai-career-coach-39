@@ -68,8 +68,10 @@ function NewAnalysis() {
   const [jobUrl, setJobUrl] = useState("");
   const [jobDesc, setJobDesc] = useState("");
   const [role, setRole] = useState("internship");
+  const [domain, setDomain] = useState("Frontend");
   const [loading, setLoading] = useState(false);
   const [stage, setStage] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
 
   const handleFile = (f: File | null) => {
