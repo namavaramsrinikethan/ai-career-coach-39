@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, Download, Sparkles, Target, BookOpen, Code2, CheckCircle2, XCircle,
-  ExternalLink, FileText, Lightbulb, GraduationCap, AlertTriangle, Circle,
+  ExternalLink, FileText, Lightbulb, GraduationCap, AlertTriangle, Circle, Braces, Copy,
 } from "lucide-react";
 import { getHistoryItem } from "@/lib/storage";
 import type { AnalysisResponse, HistoryItem } from "@/lib/types";
