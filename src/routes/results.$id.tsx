@@ -9,6 +9,7 @@ import {
   ExternalLink, FileText, Lightbulb, GraduationCap, AlertTriangle, Circle, Braces, Copy,
 } from "lucide-react";
 import { getHistoryItem } from "@/lib/storage";
+import { normalizeWebhookResponse } from "@/lib/normalize";
 import type { AnalysisResponse, HistoryItem } from "@/lib/types";
 import { toast } from "sonner";
 
