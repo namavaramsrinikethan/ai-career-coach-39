@@ -43,7 +43,7 @@ function Results() {
     );
   }
 
-  const r = item.result;
+  const r = item.rawResponse ? normalizeWebhookResponse(item.rawResponse) : item.result;
   const ats = Number(r.atsScore) || 0;
   const match = Number(r.skillMatchPercentage) || 0;
 
