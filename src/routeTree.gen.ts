@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as NewRouteImport } from './routes/new'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AtsRouteImport } from './routes/ats'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as ResultsIdRouteImport } from './routes/results.$id'
@@ -32,6 +33,11 @@ const NewRoute = NewRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtsRoute = AtsRouteImport.update({
+  id: '/ats',
+  path: '/ats',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -67,6 +73,7 @@ const DashboardHistoryRoute = DashboardHistoryRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ats': typeof AtsRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/new': typeof NewRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ats': typeof AtsRoute
   '/new': typeof NewRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard/history': typeof DashboardHistoryRoute
@@ -89,6 +97,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ats': typeof AtsRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/new': typeof NewRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -102,6 +111,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ats'
     | '/dashboard'
     | '/new'
     | '/sitemap.xml'
@@ -113,6 +123,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ats'
     | '/new'
     | '/sitemap.xml'
     | '/dashboard/history'
@@ -123,6 +134,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/ats'
     | '/dashboard'
     | '/new'
     | '/sitemap.xml'
@@ -135,6 +147,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AtsRoute: typeof AtsRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   NewRoute: typeof NewRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -162,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ats': {
+      id: '/ats'
+      path: '/ats'
+      fullPath: '/ats'
+      preLoaderRoute: typeof AtsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -229,6 +249,7 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AtsRoute: AtsRoute,
   DashboardRoute: DashboardRouteWithChildren,
   NewRoute: NewRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
