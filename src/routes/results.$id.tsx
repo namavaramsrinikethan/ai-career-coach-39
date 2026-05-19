@@ -9,6 +9,7 @@ import {
   ExternalLink, FileText, Lightbulb, GraduationCap, AlertTriangle, Circle, Braces, Copy,
 } from "lucide-react";
 import { getHistoryItem } from "@/lib/storage";
+import { normalizeWebhookResponse } from "@/lib/normalize";
 import type { AnalysisResponse, HistoryItem } from "@/lib/types";
 import { toast } from "sonner";
 
@@ -42,7 +43,7 @@ function Results() {
     );
   }
 
-  const r = item.result;
+  const r = item.rawResponse ? normalizeWebhookResponse(item.rawResponse) : item.result;
   const ats = Number(r.atsScore) || 0;
   const match = Number(r.skillMatchPercentage) || 0;
 
