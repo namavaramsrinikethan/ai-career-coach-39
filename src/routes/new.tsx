@@ -143,9 +143,17 @@ function NewAnalysis() {
       const rawObj = rawResponse && typeof rawResponse === "object" ? (rawResponse as any) : {};
       const modifiedPdf =
         rawObj.pdf_base64 ?? rawObj.pdfBase64 ?? rawObj.resumePdfBase64 ?? rawObj?.json?.pdf_base64 ?? "";
+      const modifiedB64Clean = typeof modifiedPdf === "string" ? modifiedPdf.replace(/^data:.*;base64,/, "") : "";
       const originalBase64 = file.type === "application/pdf" || /\.pdf$/i.test(file.name)
         ? await fileToBase64(file)
         : undefined;
+
+      // Pass exact File + decoded Blob in-memory so results page can createObjectURL directly
+      setPdfCache(id, {
+        originalFile: file,
+        modifiedBlob: modifiedB64Clean ? base64ToPdfBlob(modifiedB64Clean) ?? undefined : undefined,
+      });
+
       const item: HistoryItem = {
         id,
         createdAt: new Date().toISOString(),
@@ -156,7 +164,7 @@ function NewAnalysis() {
         rawResponse,
         originalResumeBase64: originalBase64,
         originalResumeMime: file.type || "application/pdf",
-        modifiedResumePdfBase64: typeof modifiedPdf === "string" ? modifiedPdf.replace(/^data:.*;base64,/, "") : "",
+        modifiedResumePdfBase64: modifiedB64Clean,
       };
       saveHistoryItem(item);
       clearInterval(stageTimer);
