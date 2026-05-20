@@ -14,6 +14,7 @@ import { getWebhookUrl, saveHistoryItem } from "@/lib/storage";
 import type { AnalysisResponse, HistoryItem } from "@/lib/types";
 import { mockAnalysis } from "@/lib/mock";
 import { normalizeWebhookResponse } from "@/lib/normalize";
+import { setPdfCache, base64ToPdfBlob } from "@/lib/pdf-cache";
 
 export const Route = createFileRoute("/new")({
   component: NewAnalysis,
