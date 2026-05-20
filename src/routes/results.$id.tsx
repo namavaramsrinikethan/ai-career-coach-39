@@ -26,11 +26,40 @@ export const Route = createFileRoute("/results/$id")({
 function Results() {
   const { id } = useParams({ from: "/results/$id" });
   const [item, setItem] = useState<HistoryItem | null>(null);
+  const [originalPdfUrl, setOriginalPdfUrl] = useState<string>("");
+  const [modifiedPdfUrl, setModifiedPdfUrl] = useState<string>("");
 
   useEffect(() => {
     const found = getHistoryItem(id);
     if (found) setItem(found);
   }, [id]);
+
+  useEffect(() => {
+    if (!item) return;
+    const urls: string[] = [];
+    const b64ToBlobUrl = (b64: string, mime: string) => {
+      try {
+        const clean = b64.replace(/^data:.*;base64,/, "");
+        const bin = atob(clean);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        const url = URL.createObjectURL(new Blob([bytes], { type: mime }));
+        urls.push(url);
+        return url;
+      } catch {
+        return "";
+      }
+    };
+    if (item.originalResumeBase64) {
+      setOriginalPdfUrl(b64ToBlobUrl(item.originalResumeBase64, item.originalResumeMime || "application/pdf"));
+    }
+    if (item.modifiedResumePdfBase64) {
+      setModifiedPdfUrl(b64ToBlobUrl(item.modifiedResumePdfBase64, "application/pdf"));
+    }
+    return () => {
+      urls.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [item]);
 
   if (!item) {
     return (
