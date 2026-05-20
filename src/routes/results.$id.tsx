@@ -377,6 +377,29 @@ function LegendDot({ tone, label }: { tone: "danger" | "warning" | "success"; la
   );
 }
 
+function PdfPanel({ title, subtitle, pdfUrl, fallback, muted }: {
+  title: string; subtitle: string; pdfUrl: string; fallback: string; muted?: boolean;
+}) {
+  return (
+    <Card className={`overflow-hidden border-border/60 ${muted ? "bg-card/40" : "bg-gradient-card"} flex flex-col`}>
+      <div className="flex items-center justify-between border-b border-border/60 px-5 py-3">
+        <div>
+          <p className="font-display text-sm font-semibold">{title}</p>
+          <p className="text-xs text-muted-foreground">{subtitle}</p>
+        </div>
+        <FileText className="h-4 w-4 text-muted-foreground" />
+      </div>
+      <div className="flex-1">
+        {pdfUrl ? (
+          <iframe src={pdfUrl} title={title} className="w-full" style={{ height: 600, border: 0 }} />
+        ) : (
+          <div className="flex h-[600px] items-center justify-center p-5 text-sm text-muted-foreground">{fallback}</div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
 function ResumePanel({ title, subtitle, text, ryg, muted }: {
   title: string; subtitle: string; text: string;
   ryg?: AnalysisResponse["modifiedResume"]["redYellowGreenMap"];
