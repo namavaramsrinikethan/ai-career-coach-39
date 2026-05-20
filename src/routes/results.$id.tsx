@@ -306,7 +306,7 @@ function RoadmapSection({ r }: { r: AnalysisResponse }) {
   );
 }
 
-function AiResumeSection({ r }: { r: AnalysisResponse }) {
+function AiResumeSection({ r, originalPdfUrl, modifiedPdfUrl }: { r: AnalysisResponse; originalPdfUrl: string; modifiedPdfUrl: string }) {
   const ryg = r.modifiedResume.redYellowGreenMap;
 
   const download = (url: string, ext: string) => {
