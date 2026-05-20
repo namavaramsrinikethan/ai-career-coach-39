@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { getHistoryItem } from "@/lib/storage";
 import { normalizeWebhookResponse } from "@/lib/normalize";
+import { getPdfCache, base64ToPdfBlob } from "@/lib/pdf-cache";
 import type { AnalysisResponse, HistoryItem } from "@/lib/types";
 import { toast } from "sonner";
 
@@ -36,30 +37,39 @@ function Results() {
 
   useEffect(() => {
     if (!item) return;
-    const urls: string[] = [];
-    const b64ToBlobUrl = (b64: string, mime: string) => {
-      try {
-        const clean = b64.replace(/^data:.*;base64,/, "");
-        const bin = atob(clean);
-        const bytes = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-        const url = URL.createObjectURL(new Blob([bytes], { type: mime }));
-        urls.push(url);
-        return url;
-      } catch {
-        return "";
-      }
-    };
-    if (item.originalResumeBase64) {
-      setOriginalPdfUrl(b64ToBlobUrl(item.originalResumeBase64, item.originalResumeMime || "application/pdf"));
+    const created: string[] = [];
+
+    // Original: prefer the in-memory File from /new, fall back to stored base64
+    const cached = getPdfCache(id);
+    let origUrl = "";
+    if (cached?.originalFile) {
+      origUrl = URL.createObjectURL(cached.originalFile);
+    } else if (item.originalResumeBase64) {
+      const blob = base64ToPdfBlob(item.originalResumeBase64);
+      if (blob) origUrl = URL.createObjectURL(blob);
     }
-    if (item.modifiedResumePdfBase64) {
-      setModifiedPdfUrl(b64ToBlobUrl(item.modifiedResumePdfBase64, "application/pdf"));
+    if (origUrl) {
+      created.push(origUrl);
+      setOriginalPdfUrl(origUrl);
     }
+
+    // Modified: prefer in-memory Blob, fall back to decoded base64
+    let modUrl = "";
+    if (cached?.modifiedBlob) {
+      modUrl = URL.createObjectURL(cached.modifiedBlob);
+    } else if (item.modifiedResumePdfBase64) {
+      const blob = base64ToPdfBlob(item.modifiedResumePdfBase64);
+      if (blob) modUrl = URL.createObjectURL(blob);
+    }
+    if (modUrl) {
+      created.push(modUrl);
+      setModifiedPdfUrl(modUrl);
+    }
+
     return () => {
-      urls.forEach((u) => URL.revokeObjectURL(u));
+      created.forEach((u) => URL.revokeObjectURL(u));
     };
-  }, [item]);
+  }, [item, id]);
 
   if (!item) {
     return (
@@ -391,7 +401,7 @@ function PdfPanel({ title, subtitle, pdfUrl, fallback, muted }: {
       </div>
       <div className="flex-1">
         {pdfUrl ? (
-          <iframe src={pdfUrl} title={title} className="w-full" style={{ height: 600, border: 0 }} />
+          <iframe src={pdfUrl} title={title} width="100%" height="600" style={{ border: 0 }} />
         ) : (
           <div className="flex h-[600px] items-center justify-center p-5 text-sm text-muted-foreground">{fallback}</div>
         )}
