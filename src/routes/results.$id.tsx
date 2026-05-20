@@ -401,7 +401,7 @@ function PdfPanel({ title, subtitle, pdfUrl, fallback, muted }: {
       </div>
       <div className="flex-1">
         {pdfUrl ? (
-          <iframe src={pdfUrl} title={title} className="w-full" style={{ height: 600, border: 0 }} />
+          <iframe src={pdfUrl} title={title} width="100%" height="600" style={{ border: 0 }} />
         ) : (
           <div className="flex h-[600px] items-center justify-center p-5 text-sm text-muted-foreground">{fallback}</div>
         )}
