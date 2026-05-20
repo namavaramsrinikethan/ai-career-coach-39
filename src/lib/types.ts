@@ -39,4 +39,7 @@ export interface HistoryItem {
   result: AnalysisResponse;
   rawResponse?: unknown;
   saved?: boolean;
+  originalResumeBase64?: string;
+  originalResumeMime?: string;
+  modifiedResumePdfBase64?: string;
 }

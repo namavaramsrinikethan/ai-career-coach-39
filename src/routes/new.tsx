@@ -139,6 +139,12 @@ function NewAnalysis() {
       }
 
       const id = crypto.randomUUID();
+      const rawObj = rawResponse && typeof rawResponse === "object" ? (rawResponse as any) : {};
+      const modifiedPdf =
+        rawObj.pdf_base64 ?? rawObj.pdfBase64 ?? rawObj.resumePdfBase64 ?? rawObj?.json?.pdf_base64 ?? "";
+      const originalBase64 = file.type === "application/pdf" || /\.pdf$/i.test(file.name)
+        ? await fileToBase64(file)
+        : undefined;
       const item: HistoryItem = {
         id,
         createdAt: new Date().toISOString(),
@@ -147,6 +153,9 @@ function NewAnalysis() {
         atsScore: Number(result.atsScore) || 0,
         result,
         rawResponse,
+        originalResumeBase64: originalBase64,
+        originalResumeMime: file.type || "application/pdf",
+        modifiedResumePdfBase64: typeof modifiedPdf === "string" ? modifiedPdf.replace(/^data:.*;base64,/, "") : "",
       };
       saveHistoryItem(item);
       clearInterval(stageTimer);

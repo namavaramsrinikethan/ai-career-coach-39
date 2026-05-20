@@ -26,11 +26,40 @@ export const Route = createFileRoute("/results/$id")({
 function Results() {
   const { id } = useParams({ from: "/results/$id" });
   const [item, setItem] = useState<HistoryItem | null>(null);
+  const [originalPdfUrl, setOriginalPdfUrl] = useState<string>("");
+  const [modifiedPdfUrl, setModifiedPdfUrl] = useState<string>("");
 
   useEffect(() => {
     const found = getHistoryItem(id);
     if (found) setItem(found);
   }, [id]);
+
+  useEffect(() => {
+    if (!item) return;
+    const urls: string[] = [];
+    const b64ToBlobUrl = (b64: string, mime: string) => {
+      try {
+        const clean = b64.replace(/^data:.*;base64,/, "");
+        const bin = atob(clean);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        const url = URL.createObjectURL(new Blob([bytes], { type: mime }));
+        urls.push(url);
+        return url;
+      } catch {
+        return "";
+      }
+    };
+    if (item.originalResumeBase64) {
+      setOriginalPdfUrl(b64ToBlobUrl(item.originalResumeBase64, item.originalResumeMime || "application/pdf"));
+    }
+    if (item.modifiedResumePdfBase64) {
+      setModifiedPdfUrl(b64ToBlobUrl(item.modifiedResumePdfBase64, "application/pdf"));
+    }
+    return () => {
+      urls.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [item]);
 
   if (!item) {
     return (
@@ -105,7 +134,7 @@ function Results() {
             <TabsTrigger value="raw"><Braces className="mr-1 h-3.5 w-3.5" />Raw</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="resume" className="mt-6"><AiResumeSection r={r} /></TabsContent>
+          <TabsContent value="resume" className="mt-6"><AiResumeSection r={r} originalPdfUrl={originalPdfUrl} modifiedPdfUrl={modifiedPdfUrl} /></TabsContent>
           <TabsContent value="skills" className="mt-6"><SkillsSection r={r} /></TabsContent>
           <TabsContent value="projects" className="mt-6"><ProjectsSection r={r} /></TabsContent>
           <TabsContent value="roadmap" className="mt-6"><RoadmapSection r={r} /></TabsContent>
@@ -277,7 +306,7 @@ function RoadmapSection({ r }: { r: AnalysisResponse }) {
   );
 }
 
-function AiResumeSection({ r }: { r: AnalysisResponse }) {
+function AiResumeSection({ r, originalPdfUrl, modifiedPdfUrl }: { r: AnalysisResponse; originalPdfUrl: string; modifiedPdfUrl: string }) {
   const ryg = r.modifiedResume.redYellowGreenMap;
 
   const download = (url: string, ext: string) => {
@@ -324,8 +353,8 @@ function AiResumeSection({ r }: { r: AnalysisResponse }) {
 
       {/* Side by side */}
       <div className="grid gap-5 lg:grid-cols-2">
-        <ResumePanel title="Original Resume" subtitle="What you uploaded" text={r.modifiedResume.originalText || "Original resume preview unavailable."} muted />
-        <ResumePanel title="AI Modified Resume" subtitle="Optimized for the target role" text={r.modifiedResume.previewText} ryg={ryg} />
+        <PdfPanel title="Original Resume" subtitle="What you uploaded" pdfUrl={originalPdfUrl} fallback="Original resume preview unavailable." muted />
+        <PdfPanel title="AI Modified Resume" subtitle="Optimized for the target role" pdfUrl={modifiedPdfUrl} fallback="AI modified resume preview unavailable." />
       </div>
 
       {/* RYG breakdown */}
@@ -345,6 +374,29 @@ function LegendDot({ tone, label }: { tone: "danger" | "warning" | "success"; la
       <span className={`h-2 w-2 rounded-full ${c}`} />
       <span className="text-muted-foreground">{label}</span>
     </div>
+  );
+}
+
+function PdfPanel({ title, subtitle, pdfUrl, fallback, muted }: {
+  title: string; subtitle: string; pdfUrl: string; fallback: string; muted?: boolean;
+}) {
+  return (
+    <Card className={`overflow-hidden border-border/60 ${muted ? "bg-card/40" : "bg-gradient-card"} flex flex-col`}>
+      <div className="flex items-center justify-between border-b border-border/60 px-5 py-3">
+        <div>
+          <p className="font-display text-sm font-semibold">{title}</p>
+          <p className="text-xs text-muted-foreground">{subtitle}</p>
+        </div>
+        <FileText className="h-4 w-4 text-muted-foreground" />
+      </div>
+      <div className="flex-1">
+        {pdfUrl ? (
+          <iframe src={pdfUrl} title={title} className="w-full" style={{ height: 600, border: 0 }} />
+        ) : (
+          <div className="flex h-[600px] items-center justify-center p-5 text-sm text-muted-foreground">{fallback}</div>
+        )}
+      </div>
+    </Card>
   );
 }
 
