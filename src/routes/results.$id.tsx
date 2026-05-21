@@ -114,7 +114,7 @@ function Results() {
             <TabsTrigger value="projects"><Code2 className="mr-1 h-3.5 w-3.5" />Projects</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="resume" className="mt-6"><AiResumeSection r={r} originalPdfUrl={originalPdfUrl} modifiedPdfUrl={modifiedPdfUrl} /></TabsContent>
+          <TabsContent value="resume" className="mt-6"><AiResumeSection r={r} originalSource={originalSource} modifiedSource={modifiedSource} /></TabsContent>
           <TabsContent value="skills" className="mt-6"><SkillsSection r={r} /></TabsContent>
           <TabsContent value="projects" className="mt-6"><ProjectsSection r={r} /></TabsContent>
         </Tabs>
