@@ -10,7 +10,8 @@ import {
 } from "lucide-react";
 import { getHistoryItem } from "@/lib/storage";
 import { normalizeWebhookResponse } from "@/lib/normalize";
-import { getPdfCache, base64ToPdfBlob } from "@/lib/pdf-cache";
+import { getPdfCache } from "@/lib/pdf-cache";
+import { PdfViewer } from "@/components/pdf-viewer";
 import type { AnalysisResponse, HistoryItem } from "@/lib/types";
 import { toast } from "sonner";
 
@@ -27,8 +28,8 @@ export const Route = createFileRoute("/results/$id")({
 function Results() {
   const { id } = useParams({ from: "/results/$id" });
   const [item, setItem] = useState<HistoryItem | null>(null);
-  const [originalPdfUrl, setOriginalPdfUrl] = useState<string>("");
-  const [modifiedPdfUrl, setModifiedPdfUrl] = useState<string>("");
+  const [originalSource, setOriginalSource] = useState<File | string | null>(null);
+  const [modifiedSource, setModifiedSource] = useState<string | null>(null);
 
   useEffect(() => {
     const found = getHistoryItem(id);
@@ -37,38 +38,9 @@ function Results() {
 
   useEffect(() => {
     if (!item) return;
-    const created: string[] = [];
-
-    // Original: prefer the in-memory File from /new, fall back to stored base64
     const cached = getPdfCache(id);
-    let origUrl = "";
-    if (cached?.originalFile) {
-      origUrl = URL.createObjectURL(cached.originalFile);
-    } else if (item.originalResumeBase64) {
-      const blob = base64ToPdfBlob(item.originalResumeBase64);
-      if (blob) origUrl = URL.createObjectURL(blob);
-    }
-    if (origUrl) {
-      created.push(origUrl);
-      setOriginalPdfUrl(origUrl);
-    }
-
-    // Modified: prefer in-memory Blob, fall back to decoded base64
-    let modUrl = "";
-    if (cached?.modifiedBlob) {
-      modUrl = URL.createObjectURL(cached.modifiedBlob);
-    } else if (item.modifiedResumePdfBase64) {
-      const blob = base64ToPdfBlob(item.modifiedResumePdfBase64);
-      if (blob) modUrl = URL.createObjectURL(blob);
-    }
-    if (modUrl) {
-      created.push(modUrl);
-      setModifiedPdfUrl(modUrl);
-    }
-
-    return () => {
-      created.forEach((u) => URL.revokeObjectURL(u));
-    };
+    setOriginalSource(cached?.originalFile ?? item.originalResumeBase64 ?? null);
+    setModifiedSource(item.modifiedResumePdfBase64 ?? null);
   }, [item, id]);
 
   if (!item) {
@@ -142,7 +114,7 @@ function Results() {
             <TabsTrigger value="projects"><Code2 className="mr-1 h-3.5 w-3.5" />Projects</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="resume" className="mt-6"><AiResumeSection r={r} originalPdfUrl={originalPdfUrl} modifiedPdfUrl={modifiedPdfUrl} /></TabsContent>
+          <TabsContent value="resume" className="mt-6"><AiResumeSection r={r} originalSource={originalSource} modifiedSource={modifiedSource} /></TabsContent>
           <TabsContent value="skills" className="mt-6"><SkillsSection r={r} /></TabsContent>
           <TabsContent value="projects" className="mt-6"><ProjectsSection r={r} /></TabsContent>
         </Tabs>
@@ -312,7 +284,7 @@ function RoadmapSection({ r }: { r: AnalysisResponse }) {
   );
 }
 
-function AiResumeSection({ r, originalPdfUrl, modifiedPdfUrl }: { r: AnalysisResponse; originalPdfUrl: string; modifiedPdfUrl: string }) {
+function AiResumeSection({ r, originalSource, modifiedSource }: { r: AnalysisResponse; originalSource: File | string | null; modifiedSource: string | null }) {
   const ryg = r.modifiedResume.redYellowGreenMap;
 
   const download = (url: string, ext: string) => {
@@ -359,8 +331,8 @@ function AiResumeSection({ r, originalPdfUrl, modifiedPdfUrl }: { r: AnalysisRes
 
       {/* Side by side */}
       <div className="grid gap-5 lg:grid-cols-2">
-        <PdfPanel title="Original Resume" subtitle="What you uploaded" pdfUrl={originalPdfUrl} fallback="Original resume preview unavailable." muted />
-        <PdfPanel title="AI Modified Resume" subtitle="Optimized for the target role" pdfUrl={modifiedPdfUrl} fallback="AI modified resume preview unavailable." />
+        <PdfPanel title="Original Resume" subtitle="What you uploaded" source={originalSource} fallback="Original resume preview unavailable." muted />
+        <PdfPanel title="AI Modified Resume" subtitle="Optimized for the target role" source={modifiedSource} fallback="AI modified resume preview unavailable." />
       </div>
 
       {/* RYG breakdown */}
@@ -383,8 +355,8 @@ function LegendDot({ tone, label }: { tone: "danger" | "warning" | "success"; la
   );
 }
 
-function PdfPanel({ title, subtitle, pdfUrl, fallback, muted }: {
-  title: string; subtitle: string; pdfUrl: string; fallback: string; muted?: boolean;
+function PdfPanel({ title, subtitle, source, fallback, muted }: {
+  title: string; subtitle: string; source: File | string | null; fallback: string; muted?: boolean;
 }) {
   return (
     <Card className={`overflow-hidden border-border/60 ${muted ? "bg-card/40" : "bg-gradient-card"} flex flex-col`}>
@@ -396,11 +368,7 @@ function PdfPanel({ title, subtitle, pdfUrl, fallback, muted }: {
         <FileText className="h-4 w-4 text-muted-foreground" />
       </div>
       <div className="flex-1">
-        {pdfUrl ? (
-          <iframe src={pdfUrl} title={title} width="100%" height="600" style={{ border: 0 }} />
-        ) : (
-          <div className="flex h-[600px] items-center justify-center p-5 text-sm text-muted-foreground">{fallback}</div>
-        )}
+        <PdfViewer source={source} fallback={fallback} width={500} />
       </div>
     </Card>
   );
