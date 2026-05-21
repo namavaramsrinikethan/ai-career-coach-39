@@ -331,8 +331,8 @@ function AiResumeSection({ r, originalSource, modifiedSource }: { r: AnalysisRes
 
       {/* Side by side */}
       <div className="grid gap-5 lg:grid-cols-2">
-        <PdfPanel title="Original Resume" subtitle="What you uploaded" pdfUrl={originalPdfUrl} fallback="Original resume preview unavailable." muted />
-        <PdfPanel title="AI Modified Resume" subtitle="Optimized for the target role" pdfUrl={modifiedPdfUrl} fallback="AI modified resume preview unavailable." />
+        <PdfPanel title="Original Resume" subtitle="What you uploaded" source={originalSource} fallback="Original resume preview unavailable." muted />
+        <PdfPanel title="AI Modified Resume" subtitle="Optimized for the target role" source={modifiedSource} fallback="AI modified resume preview unavailable." />
       </div>
 
       {/* RYG breakdown */}
