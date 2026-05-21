@@ -10,7 +10,8 @@ import {
 } from "lucide-react";
 import { getHistoryItem } from "@/lib/storage";
 import { normalizeWebhookResponse } from "@/lib/normalize";
-import { getPdfCache, base64ToPdfBlob } from "@/lib/pdf-cache";
+import { getPdfCache } from "@/lib/pdf-cache";
+import { PdfViewer } from "@/components/pdf-viewer";
 import type { AnalysisResponse, HistoryItem } from "@/lib/types";
 import { toast } from "sonner";
 
