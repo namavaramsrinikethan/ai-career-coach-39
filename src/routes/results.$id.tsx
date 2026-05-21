@@ -316,9 +316,6 @@ function AiResumeSection({ r, originalSource, modifiedSource }: { r: AnalysisRes
           <Button variant="hero" onClick={() => download(r.modifiedResume.downloadUrlPDF, "pdf")}>
             <Download className="h-4 w-4" /> Download PDF
           </Button>
-          <Button variant="outline" onClick={() => download(r.modifiedResume.downloadUrlDOCX, "docx")}>
-            <Download className="h-4 w-4" /> Download DOCX
-          </Button>
         </div>
       </Card>
 
