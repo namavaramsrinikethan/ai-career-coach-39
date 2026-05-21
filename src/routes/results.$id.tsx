@@ -284,7 +284,7 @@ function RoadmapSection({ r }: { r: AnalysisResponse }) {
   );
 }
 
-function AiResumeSection({ r, originalPdfUrl, modifiedPdfUrl }: { r: AnalysisResponse; originalPdfUrl: string; modifiedPdfUrl: string }) {
+function AiResumeSection({ r, originalSource, modifiedSource }: { r: AnalysisResponse; originalSource: File | string | null; modifiedSource: string | null }) {
   const ryg = r.modifiedResume.redYellowGreenMap;
 
   const download = (url: string, ext: string) => {
