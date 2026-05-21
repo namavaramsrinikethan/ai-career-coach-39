@@ -28,8 +28,8 @@ export const Route = createFileRoute("/results/$id")({
 function Results() {
   const { id } = useParams({ from: "/results/$id" });
   const [item, setItem] = useState<HistoryItem | null>(null);
-  const [originalPdfUrl, setOriginalPdfUrl] = useState<string>("");
-  const [modifiedPdfUrl, setModifiedPdfUrl] = useState<string>("");
+  const [originalSource, setOriginalSource] = useState<File | string | null>(null);
+  const [modifiedSource, setModifiedSource] = useState<string | null>(null);
 
   useEffect(() => {
     const found = getHistoryItem(id);
@@ -38,38 +38,9 @@ function Results() {
 
   useEffect(() => {
     if (!item) return;
-    const created: string[] = [];
-
-    // Original: prefer the in-memory File from /new, fall back to stored base64
     const cached = getPdfCache(id);
-    let origUrl = "";
-    if (cached?.originalFile) {
-      origUrl = URL.createObjectURL(cached.originalFile);
-    } else if (item.originalResumeBase64) {
-      const blob = base64ToPdfBlob(item.originalResumeBase64);
-      if (blob) origUrl = URL.createObjectURL(blob);
-    }
-    if (origUrl) {
-      created.push(origUrl);
-      setOriginalPdfUrl(origUrl);
-    }
-
-    // Modified: prefer in-memory Blob, fall back to decoded base64
-    let modUrl = "";
-    if (cached?.modifiedBlob) {
-      modUrl = URL.createObjectURL(cached.modifiedBlob);
-    } else if (item.modifiedResumePdfBase64) {
-      const blob = base64ToPdfBlob(item.modifiedResumePdfBase64);
-      if (blob) modUrl = URL.createObjectURL(blob);
-    }
-    if (modUrl) {
-      created.push(modUrl);
-      setModifiedPdfUrl(modUrl);
-    }
-
-    return () => {
-      created.forEach((u) => URL.revokeObjectURL(u));
-    };
+    setOriginalSource(cached?.originalFile ?? item.originalResumeBase64 ?? null);
+    setModifiedSource(item.modifiedResumePdfBase64 ?? null);
   }, [item, id]);
 
   if (!item) {
