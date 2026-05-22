@@ -146,7 +146,7 @@ function NewAnalysis() {
         await new Promise((r) => setTimeout(r, 4500));
         result = mockAnalysis(jobTitle);
         rawResponse = result;
-        toast.info("Showing demo analysis. Configure your n8n webhook in Settings to use real AI.");
+        toast.info("Showing demo analysis.");
       }
 
       const id = crypto.randomUUID();
