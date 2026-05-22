@@ -239,8 +239,6 @@ function ResumeShowcase() {
   );
 }
 
-import { PublicPricing } from "./dashboard.subscription";
-
 function Pricing() {
   return (
     <section id="pricing" className="border-t border-border/40 bg-background/40 py-24">
