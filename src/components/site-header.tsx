@@ -2,9 +2,12 @@ import { Link } from "@tanstack/react-router";
 import { Sparkles, Moon, Sun } from "lucide-react";
 import { useTheme } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
+import { UserMenu } from "@/routes/dashboard";
 
 export function SiteHeader() {
   const { theme, toggle } = useTheme();
+  const { user, loading } = useAuth();
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/60 backdrop-blur-xl">
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
@@ -26,12 +29,26 @@ export function SiteHeader() {
           <Button variant="ghost" size="icon" onClick={toggle} aria-label="Toggle theme">
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
-          <Link to="/dashboard">
-            <Button variant="ghost" size="sm">Dashboard</Button>
-          </Link>
-          <Link to="/new">
-            <Button variant="hero" size="sm">Analyze Resume</Button>
-          </Link>
+          {!loading && user ? (
+            <>
+              <Link to="/dashboard">
+                <Button variant="ghost" size="sm">Dashboard</Button>
+              </Link>
+              <Link to="/new">
+                <Button variant="hero" size="sm">Analyze Resume</Button>
+              </Link>
+              <UserMenu />
+            </>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="ghost" size="sm">Sign in</Button>
+              </Link>
+              <Link to="/signup">
+                <Button variant="hero" size="sm">Get started</Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>
