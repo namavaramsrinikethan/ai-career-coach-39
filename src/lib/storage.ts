@@ -43,10 +43,4 @@ export const updateHistoryItem = (id: string, patch: Partial<HistoryItem>) => {
 };
 
 export const getHistoryItem = (id: string) => getHistory().find((i) => i.id === id);
-
-export const getWebhookUrl = () => {
-  if (typeof window === "undefined") return DEFAULT_WEBHOOK_URL;
-  return localStorage.getItem(WEBHOOK_KEY) || DEFAULT_WEBHOOK_URL;
-};
-
-export const setWebhookUrl = (url: string) => localStorage.setItem(WEBHOOK_KEY, url);
+export const getWebhookUrl = () => DEFAULT_WEBHOOK_URL;
