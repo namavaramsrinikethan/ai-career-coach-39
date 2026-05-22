@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
-  LayoutDashboard, Plus, History, Bookmark, Settings, Sparkles, Moon, Sun, ArrowLeft, LogOut,
+  LayoutDashboard, Plus, History, Bookmark, Settings, Sparkles, Moon, Sun, ArrowLeft, LogOut, CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/lib/theme";
@@ -33,7 +33,7 @@ function DashboardGuarded() {
 
 
 type NavItem = {
-  to: "/new" | "/dashboard" | "/dashboard/history" | "/dashboard/saved" | "/dashboard/settings";
+  to: "/new" | "/dashboard" | "/dashboard/history" | "/dashboard/saved" | "/dashboard/subscription" | "/dashboard/settings";
   label: string;
   icon: typeof Plus;
   primary?: boolean;
@@ -45,6 +45,7 @@ const navItems: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/dashboard/history", label: "History", icon: History },
   { to: "/dashboard/saved", label: "Saved Reports", icon: Bookmark },
+  { to: "/dashboard/subscription", label: "Subscription", icon: CreditCard },
   { to: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
