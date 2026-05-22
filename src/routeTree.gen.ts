@@ -18,6 +18,7 @@ import { Route as AtsRouteImport } from './routes/ats'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as ResultsIdRouteImport } from './routes/results.$id'
+import { Route as DashboardSubscriptionRouteImport } from './routes/dashboard.subscription'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardSavedRouteImport } from './routes/dashboard.saved'
 import { Route as DashboardHistoryRouteImport } from './routes/dashboard.history'
@@ -67,6 +68,11 @@ const ResultsIdRoute = ResultsIdRouteImport.update({
   path: '/results/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardSubscriptionRoute = DashboardSubscriptionRouteImport.update({
+  id: '/subscription',
+  path: '/subscription',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/history': typeof DashboardHistoryRoute
   '/dashboard/saved': typeof DashboardSavedRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/subscription': typeof DashboardSubscriptionRoute
   '/results/$id': typeof ResultsIdRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/dashboard/history': typeof DashboardHistoryRoute
   '/dashboard/saved': typeof DashboardSavedRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/subscription': typeof DashboardSubscriptionRoute
   '/results/$id': typeof ResultsIdRoute
   '/dashboard': typeof DashboardIndexRoute
 }
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/dashboard/history': typeof DashboardHistoryRoute
   '/dashboard/saved': typeof DashboardSavedRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/subscription': typeof DashboardSubscriptionRoute
   '/results/$id': typeof ResultsIdRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
     | '/dashboard/history'
     | '/dashboard/saved'
     | '/dashboard/settings'
+    | '/dashboard/subscription'
     | '/results/$id'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
@@ -151,6 +161,7 @@ export interface FileRouteTypes {
     | '/dashboard/history'
     | '/dashboard/saved'
     | '/dashboard/settings'
+    | '/dashboard/subscription'
     | '/results/$id'
     | '/dashboard'
   id:
@@ -165,6 +176,7 @@ export interface FileRouteTypes {
     | '/dashboard/history'
     | '/dashboard/saved'
     | '/dashboard/settings'
+    | '/dashboard/subscription'
     | '/results/$id'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
@@ -245,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResultsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/subscription': {
+      id: '/dashboard/subscription'
+      path: '/subscription'
+      fullPath: '/dashboard/subscription'
+      preLoaderRoute: typeof DashboardSubscriptionRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/settings': {
       id: '/dashboard/settings'
       path: '/settings'
@@ -273,6 +292,7 @@ interface DashboardRouteChildren {
   DashboardHistoryRoute: typeof DashboardHistoryRoute
   DashboardSavedRoute: typeof DashboardSavedRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
+  DashboardSubscriptionRoute: typeof DashboardSubscriptionRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
@@ -280,6 +300,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardHistoryRoute: DashboardHistoryRoute,
   DashboardSavedRoute: DashboardSavedRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,
+  DashboardSubscriptionRoute: DashboardSubscriptionRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 
