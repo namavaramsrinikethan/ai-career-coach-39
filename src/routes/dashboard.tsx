@@ -1,10 +1,17 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
-  LayoutDashboard, Plus, History, Bookmark, Settings, Sparkles, Moon, Sun, ArrowLeft,
+  LayoutDashboard, Plus, History, Bookmark, Settings, Sparkles, Moon, Sun, ArrowLeft, LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/lib/theme";
+import { useAuth, RequireAuth } from "@/lib/auth";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardLayout,
