@@ -238,49 +238,21 @@ function ResumeShowcase() {
   );
 }
 
-const plans = [
-  { name: "Free", price: "₹0", desc: "Perfect to try", features: ["3 analyses / month", "ATS score + skill gaps", "Basic AI resume rewrite", "PDF download"], cta: "Start free", highlight: false },
-  { name: "Pro", price: "₹299", per: "/mo", desc: "For serious placement prep", features: ["Unlimited analyses", "Full AI resume rewrite", "PDF + DOCX downloads", "Saved reports & history", "Priority AI processing"], cta: "Go Pro", highlight: true },
-  { name: "Campus", price: "Custom", desc: "For colleges & TPOs", features: ["Bulk student onboarding", "Branded analytics dashboard", "TPO admin controls", "Email + chat support"], cta: "Contact sales", highlight: false },
-];
+import { PublicPricing } from "./dashboard.subscription";
 
 function Pricing() {
   return (
     <section id="pricing" className="border-t border-border/40 bg-background/40 py-24">
-      <div className="container mx-auto max-w-7xl px-4">
+      <div className="container mx-auto max-w-5xl px-4">
         <div className="mx-auto max-w-2xl text-center">
           <Badge variant="outline" className="mb-4">Pricing</Badge>
           <h2 className="font-display text-4xl font-bold md:text-5xl">Simple, student-friendly</h2>
+          <p className="mt-3 text-muted-foreground">
+            Start free. Upgrade when you're serious about placements.
+          </p>
         </div>
-        <div className="mt-16 grid gap-6 md:grid-cols-3">
-          {plans.map((p) => (
-            <Card
-              key={p.name}
-              className={`relative p-7 ${p.highlight
-                ? "border-primary/50 bg-gradient-card shadow-glow"
-                : "border-border/60 bg-card/60"}`}
-            >
-              {p.highlight && (
-                <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-gradient-primary text-primary-foreground">Most popular</Badge>
-              )}
-              <h3 className="font-display text-lg font-semibold">{p.name}</h3>
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="font-display text-4xl font-bold">{p.price}</span>
-                {p.per && <span className="text-sm text-muted-foreground">{p.per}</span>}
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">{p.desc}</p>
-              <ul className="mt-6 space-y-2.5 text-sm">
-                {p.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" /> {f}
-                  </li>
-                ))}
-              </ul>
-              <Link to="/new" className="mt-7 block">
-                <Button variant={p.highlight ? "hero" : "outline"} className="w-full">{p.cta}</Button>
-              </Link>
-            </Card>
-          ))}
+        <div className="mt-16">
+          <PublicPricing />
         </div>
       </div>
     </section>
