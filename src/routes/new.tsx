@@ -192,6 +192,7 @@ function NewAnalysis() {
         modifiedResumePdfBase64: modifiedB64Clean,
       };
       saveHistoryItem(item);
+      if (user) incrementUsage(user.id);
       clearInterval(stageTimer);
       navigate({ to: "/results/$id", params: { id } });
     } catch (e) {
