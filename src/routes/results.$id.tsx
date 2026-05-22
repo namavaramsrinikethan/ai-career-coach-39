@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { getHistoryItem } from "@/lib/storage";
 import { normalizeWebhookResponse } from "@/lib/normalize";
-import { getPdfCache } from "@/lib/pdf-cache";
+import { getPdfCache, getModifiedPdfDataUrl } from "@/lib/pdf-cache";
 import { PdfViewer } from "@/components/pdf-viewer";
 import type { AnalysisResponse, HistoryItem } from "@/lib/types";
 import { toast } from "sonner";
@@ -50,7 +50,8 @@ function Results() {
     if (!item) return;
     const cached = getPdfCache(id);
     setOriginalSource(cached?.originalFile ?? item.originalResumeBase64 ?? null);
-    setModifiedSource(item.modifiedResumePdfBase64 ?? null);
+    const cachedModified = getModifiedPdfDataUrl(id);
+    setModifiedSource(cachedModified ?? item.modifiedResumePdfBase64 ?? null);
   }, [item, id]);
 
   if (!item) {
