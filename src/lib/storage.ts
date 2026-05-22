@@ -14,15 +14,33 @@ export const getHistory = (): HistoryItem[] => {
   }
 };
 
+const MAX_HISTORY = 5;
+
+const persist = (items: HistoryItem[]) => {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(items.slice(0, MAX_HISTORY)));
+  } catch {
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(items.slice(0, 1)));
+    } catch {
+      localStorage.removeItem(HISTORY_KEY);
+    }
+  }
+};
+
 export const saveHistoryItem = (item: HistoryItem) => {
-  const items = getHistory();
-  items.unshift(item);
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(items.slice(0, 50)));
+  // Strip heavy payloads (base64 PDFs, raw webhook response) before persisting
+  const slim: HistoryItem = {
+    ...item,
+    originalResumeBase64: undefined,
+    modifiedResumePdfBase64: undefined,
+    rawResponse: undefined,
+  };
+  persist([slim, ...getHistory()]);
 };
 
 export const updateHistoryItem = (id: string, patch: Partial<HistoryItem>) => {
-  const items = getHistory().map((i) => (i.id === id ? { ...i, ...patch } : i));
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(items));
+  persist(getHistory().map((i) => (i.id === id ? { ...i, ...patch } : i)));
 };
 
 export const getHistoryItem = (id: string) => getHistory().find((i) => i.id === id);
