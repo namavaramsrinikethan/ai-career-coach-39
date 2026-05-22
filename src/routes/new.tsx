@@ -77,7 +77,6 @@ function fileToBase64(file: File): Promise<string> {
 function NewAnalysis() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const sub = user ? getSubscription(user.id) : null;
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [jobUrl, setJobUrl] = useState("");
