@@ -50,7 +50,8 @@ function Results() {
     if (!item) return;
     const cached = getPdfCache(id);
     setOriginalSource(cached?.originalFile ?? item.originalResumeBase64 ?? null);
-    setModifiedSource(item.modifiedResumePdfBase64 ?? null);
+    const cachedModified = getModifiedPdfDataUrl(id);
+    setModifiedSource(cachedModified ?? item.modifiedResumePdfBase64 ?? null);
   }, [item, id]);
 
   if (!item) {
