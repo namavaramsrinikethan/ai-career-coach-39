@@ -57,15 +57,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "AI Placement Readiness Agent — Land your dream internship" },
+      { title: "AI Resume Analyzer & ATS Checker — Get Job-Ready Instantly" },
       {
         name: "description",
         content:
           "AI-powered platform that analyzes your resume against any job, finds skill gaps, recommends projects, and generates an optimized resume.",
       },
-      { property: "og:title", content: "AI Placement Readiness Agent" },
-      { property: "og:description", content: "Boost your placement readiness with AI." },
+      { property: "og:title", content: "AI Resume Analyzer & ATS Checker — Get Job-Ready Instantly" },
+      { property: "og:description", content: "AI resume checker that gives ATS score, finds skill gaps, and instantly rewrites your resume to improve job and internship shortlist chances." },
       { property: "og:type", content: "website" },
+      { name: "twitter:title", content: "AI Resume Analyzer & ATS Checker — Get Job-Ready Instantly" },
+      { name: "description", content: "AI resume checker that gives ATS score, finds skill gaps, and instantly rewrites your resume to improve job and internship shortlist chances." },
+      { name: "twitter:description", content: "AI resume checker that gives ATS score, finds skill gaps, and instantly rewrites your resume to improve job and internship shortlist chances." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/fa3f4421-15b7-4af6-822a-86bb96535084" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/fa3f4421-15b7-4af6-822a-86bb96535084" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
