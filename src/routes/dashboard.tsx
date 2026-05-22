@@ -1,13 +1,20 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
-  LayoutDashboard, Plus, History, Bookmark, Settings, Sparkles, Moon, Sun, ArrowLeft,
+  LayoutDashboard, Plus, History, Bookmark, Settings, Sparkles, Moon, Sun, ArrowLeft, LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/lib/theme";
+import { useAuth, RequireAuth } from "@/lib/auth";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard")({
-  component: DashboardLayout,
+  component: DashboardGuarded,
   head: () => ({
     meta: [
       { title: "Dashboard — PlacementAI" },
@@ -15,6 +22,15 @@ export const Route = createFileRoute("/dashboard")({
     ],
   }),
 });
+
+function DashboardGuarded() {
+  return (
+    <RequireAuth>
+      <DashboardLayout />
+    </RequireAuth>
+  );
+}
+
 
 type NavItem = {
   to: "/new" | "/dashboard" | "/dashboard/history" | "/dashboard/saved" | "/dashboard/settings";
@@ -100,7 +116,9 @@ function DashboardLayout() {
                 <Plus className="h-4 w-4" /> New
               </Button>
             </Link>
+            <UserMenu />
           </div>
+
         </header>
 
         <main className="flex-1 p-6 md:p-10">
@@ -110,3 +128,46 @@ function DashboardLayout() {
     </div>
   );
 }
+
+export function UserMenu() {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  if (!user) return null;
+  const initial = (user.email ?? "?").charAt(0).toUpperCase();
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="rounded-full">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="bg-gradient-primary text-xs font-semibold text-primary-foreground">
+              {initial}
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel>
+          <div className="flex flex-col">
+            <span className="text-xs text-muted-foreground">Signed in as</span>
+            <span className="truncate text-sm font-medium">{user.email}</span>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate({ to: "/dashboard" })}>
+          <LayoutDashboard className="h-4 w-4" /> Dashboard
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={async () => {
+            await signOut();
+            toast.success("Signed out");
+            navigate({ to: "/" });
+          }}
+          className="text-destructive focus:text-destructive"
+        >
+          <LogOut className="h-4 w-4" /> Sign out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+

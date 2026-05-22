@@ -15,9 +15,10 @@ import type { AnalysisResponse, HistoryItem } from "@/lib/types";
 import { mockAnalysis } from "@/lib/mock";
 import { normalizeWebhookResponse } from "@/lib/normalize";
 import { setPdfCache, base64ToPdfBlob } from "@/lib/pdf-cache";
+import { RequireAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/new")({
-  component: NewAnalysis,
+  component: NewAnalysisGuarded,
   head: () => ({
     meta: [
       { title: "New Analysis — PlacementAI" },
@@ -25,6 +26,15 @@ export const Route = createFileRoute("/new")({
     ],
   }),
 });
+
+function NewAnalysisGuarded() {
+  return (
+    <RequireAuth>
+      <NewAnalysis />
+    </RequireAuth>
+  );
+}
+
 
 const STAGES = [
   "Uploading resume...",
