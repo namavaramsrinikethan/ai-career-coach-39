@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Plus, History, Bookmark, Settings, Sparkles, Moon, Sun, ArrowLeft, LogOut, CreditCard,
 } from "lucide-react";
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { getSubscription } from "@/lib/subscription";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardGuarded,
@@ -38,20 +40,30 @@ type NavItem = {
   icon: typeof Plus;
   primary?: boolean;
   exact?: boolean;
+  proOnly?: boolean;
 };
 
 const navItems: NavItem[] = [
   { to: "/new", label: "New Analysis", icon: Plus, primary: true },
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/dashboard/history", label: "History", icon: History },
-  { to: "/dashboard/saved", label: "Saved Reports", icon: Bookmark },
+  { to: "/dashboard/history", label: "History", icon: History, proOnly: true },
+  { to: "/dashboard/saved", label: "Saved Reports", icon: Bookmark, proOnly: true },
   { to: "/dashboard/subscription", label: "Subscription", icon: CreditCard },
   { to: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
 function DashboardLayout() {
+  const { user } = useAuth();
   const { theme, toggle } = useTheme();
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const [, force] = useState(0);
+  useEffect(() => {
+    const h = () => force((x) => x + 1);
+    window.addEventListener("apr:subscription-change", h);
+    return () => window.removeEventListener("apr:subscription-change", h);
+  }, []);
+  const sub = user ? getSubscription(user.id) : null;
+  const visibleNavItems = navItems.filter((item) => !item.proOnly || sub?.plan === "pro");
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -63,7 +75,7 @@ function DashboardLayout() {
           <span className="font-display text-lg font-bold">PlacementAI</span>
         </Link>
         <nav className="flex-1 space-y-1 p-4">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const active = item.exact ? path === item.to : path.startsWith(item.to);
             if (item.primary) {
               return (
