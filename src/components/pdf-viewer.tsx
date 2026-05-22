@@ -1,36 +1,42 @@
-import { useEffect, useState } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
-import "react-pdf/dist/Page/AnnotationLayer.css";
-import "react-pdf/dist/Page/TextLayer.css";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+type Source = File | Blob | string | null | undefined;
 
-type Source = File | string | null | undefined;
+const ClientPdfViewer = lazy(() => import("./pdf-viewer.client"));
 
 export function PdfViewer({ source, width = 500, fallback }: { source: Source; width?: number; fallback?: string }) {
-  const [file, setFile] = useState<string | { data: Uint8Array } | null>(null);
-  const [numPages, setNumPages] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setError(null);
-    setNumPages(null);
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (!source) {
-      setFile(null);
+      setObjectUrl(null);
       return;
     }
     if (typeof source === "string") {
-      // base64 data URL or raw base64
-      const dataUrl = source.startsWith("data:") ? source : `data:application/pdf;base64,${source}`;
-      setFile(dataUrl);
-      return;
+      // base64 or data URL → convert to blob URL for stable rendering
+      try {
+        const clean = source.replace(/^data:.*;base64,/, "").trim();
+        const binary = atob(clean);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+        setObjectUrl(url);
+        return () => URL.revokeObjectURL(url);
+      } catch {
+        setObjectUrl(null);
+        return;
+      }
     }
-    // File
-    const reader = new FileReader();
-    reader.onload = (e) => setFile((e.target?.result as string) ?? null);
-    reader.onerror = () => setError("Failed to read file");
-    reader.readAsDataURL(source);
+    const url = URL.createObjectURL(source);
+    setObjectUrl(url);
+    return () => URL.revokeObjectURL(url);
   }, [source]);
 
   if (!source) {
@@ -41,33 +47,17 @@ export function PdfViewer({ source, width = 500, fallback }: { source: Source; w
     );
   }
 
-  return (
-    <div className="h-[600px] overflow-y-auto bg-muted/20 p-3">
-      {error && <div className="p-5 text-sm text-danger">{error}</div>}
-      {!file && !error && (
-        <div className="flex h-full items-center justify-center text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" />
-        </div>
-      )}
-      {file && (
-        <Document
-          file={file}
-          onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-          onLoadError={(e) => setError(e.message || "Failed to load PDF")}
-          loading={
-            <div className="flex h-[560px] items-center justify-center text-muted-foreground">
-              <Loader2 className="h-5 w-5 animate-spin" />
-            </div>
-          }
-          error={<div className="p-5 text-sm text-danger">Failed to load PDF</div>}
-        >
-          {Array.from({ length: numPages ?? 0 }, (_, i) => (
-            <div key={i + 1} className="mb-3 flex justify-center">
-              <Page pageNumber={i + 1} width={width} renderAnnotationLayer={false} renderTextLayer={false} />
-            </div>
-          ))}
-        </Document>
-      )}
+  const loader = (
+    <div className="flex h-[600px] items-center justify-center bg-muted/20 text-muted-foreground">
+      <Loader2 className="h-5 w-5 animate-spin" />
     </div>
+  );
+
+  if (!mounted || !objectUrl) return loader;
+
+  return (
+    <Suspense fallback={loader}>
+      <ClientPdfViewer url={objectUrl} width={width} />
+    </Suspense>
   );
 }
