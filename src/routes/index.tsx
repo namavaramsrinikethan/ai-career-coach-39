@@ -68,8 +68,7 @@ function Hero() {
             </Link>
           </div>
           <div className="mt-6 flex items-center justify-center gap-6 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-success" /> No signup required</span>
-            <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-success" /> PDF & DOCX exports</span>
+            <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-success" /> PDF exports</span>
             <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-success" /> ATS-optimized</span>
           </div>
         </div>
