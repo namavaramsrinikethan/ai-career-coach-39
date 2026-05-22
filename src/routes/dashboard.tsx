@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard")({
-  component: DashboardLayout,
+  component: DashboardGuarded,
   head: () => ({
     meta: [
       { title: "Dashboard — PlacementAI" },
@@ -22,6 +22,15 @@ export const Route = createFileRoute("/dashboard")({
     ],
   }),
 });
+
+function DashboardGuarded() {
+  return (
+    <RequireAuth>
+      <DashboardLayout />
+    </RequireAuth>
+  );
+}
+
 
 type NavItem = {
   to: "/new" | "/dashboard" | "/dashboard/history" | "/dashboard/saved" | "/dashboard/settings";
