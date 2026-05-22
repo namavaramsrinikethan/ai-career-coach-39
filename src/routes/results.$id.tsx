@@ -14,9 +14,10 @@ import { getPdfCache } from "@/lib/pdf-cache";
 import { PdfViewer } from "@/components/pdf-viewer";
 import type { AnalysisResponse, HistoryItem } from "@/lib/types";
 import { toast } from "sonner";
+import { RequireAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/results/$id")({
-  component: Results,
+  component: ResultsGuarded,
   head: () => ({
     meta: [
       { title: "Analysis Results — PlacementAI" },
@@ -24,6 +25,15 @@ export const Route = createFileRoute("/results/$id")({
     ],
   }),
 });
+
+function ResultsGuarded() {
+  return (
+    <RequireAuth>
+      <Results />
+    </RequireAuth>
+  );
+}
+
 
 function Results() {
   const { id } = useParams({ from: "/results/$id" });
