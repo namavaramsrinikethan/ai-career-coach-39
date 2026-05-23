@@ -3,7 +3,9 @@ import { Loader2 } from "lucide-react";
 
 type Source = File | Blob | string | null | undefined;
 
-const ClientPdfViewer = lazy(() => import("./pdf-viewer.client"));
+const ClientPdfViewer = lazy(() => import("./pdf-viewer-impl"));
+
+
 
 export function PdfViewer({ source, width = 500, fallback }: { source: Source; width?: number; fallback?: string }) {
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
