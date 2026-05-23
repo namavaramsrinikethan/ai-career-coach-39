@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Check, Crown, GraduationCap, Sparkles, CreditCard, Zap } from "lucide-react";
+import { Check, Crown, GraduationCap, Sparkles, CreditCard, Zap, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import {
   getSubscription,
@@ -12,11 +12,13 @@ import {
   downgradeToFree,
   PLAN_LIMITS,
 } from "@/lib/subscription";
+import { startRazorpayCheckout } from "@/lib/razorpay";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/subscription")({
   component: SubscriptionPage,
 });
+
 
 function SubscriptionPage() {
   const { user } = useAuth();
