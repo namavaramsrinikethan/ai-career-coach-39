@@ -35,8 +35,14 @@ export const createRazorpayOrder = createServerFn({ method: "POST" })
     if (!res.ok) {
       const text = await res.text();
       console.error("Razorpay order create failed:", res.status, text);
-      throw new Error("Failed to create payment order");
+      let detail = text;
+      try {
+        const parsed = JSON.parse(text) as { error?: { description?: string; code?: string } };
+        if (parsed.error?.description) detail = parsed.error.description;
+      } catch { /* noop */ }
+      throw new Error(`Razorpay: ${detail}`);
     }
+
 
     const order = (await res.json()) as { id: string; amount: number; currency: string };
     return {
