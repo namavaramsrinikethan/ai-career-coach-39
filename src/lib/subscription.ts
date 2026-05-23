@@ -82,16 +82,17 @@ export function incrementUsage(userId: string) {
   return next;
 }
 
-/** Placeholder — to be replaced by Stripe checkout in a future iteration. */
-export function upgradeToPro(userId: string) {
+/** Activate Pro plan after a successful Razorpay payment. */
+export function upgradeToPro(userId: string, paymentId: string) {
   const s = read(userId);
   write(userId, {
     ...s,
     plan: "pro",
-    subscriptionId: `placeholder_${crypto.randomUUID()}`,
+    subscriptionId: paymentId,
     currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
   });
 }
+
 
 /** Placeholder — would normally call Stripe customer portal. */
 export function downgradeToFree(userId: string) {

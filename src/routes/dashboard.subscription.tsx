@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Check, Crown, GraduationCap, Sparkles, CreditCard, Zap } from "lucide-react";
+import { Check, Crown, GraduationCap, Sparkles, CreditCard, Zap, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import {
   getSubscription,
@@ -12,15 +12,18 @@ import {
   downgradeToFree,
   PLAN_LIMITS,
 } from "@/lib/subscription";
+import { startRazorpayCheckout } from "@/lib/razorpay";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/subscription")({
   component: SubscriptionPage,
 });
 
+
 function SubscriptionPage() {
   const { user } = useAuth();
   const [, force] = useState(0);
+  const [paying, setPaying] = useState(false);
   useEffect(() => {
     const h = () => force((x) => x + 1);
     window.addEventListener("apr:subscription-change", h);
@@ -30,6 +33,29 @@ function SubscriptionPage() {
 
   const sub = getSubscription(user.id);
   const isPro = sub.plan === "pro";
+
+  const handleUpgrade = async () => {
+    if (paying) return;
+    setPaying(true);
+    try {
+      const result = await startRazorpayCheckout({
+        userId: user.id,
+        email: user.email,
+      });
+      if (result.status === "success") {
+        upgradeToPro(user.id, result.paymentId);
+        toast.success("Welcome to Pro! Your plan is now active.");
+      } else if (result.status === "dismissed") {
+        toast.message("Payment cancelled");
+      } else {
+        toast.error(result.reason || "Payment failed");
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Payment failed");
+    } finally {
+      setPaying(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
@@ -85,14 +111,16 @@ function SubscriptionPage() {
                 </Button>
               </>
             ) : (
-              <Button
-                variant="hero"
-                onClick={() => {
-                  upgradeToPro(user.id);
-                  toast.success("Upgraded to Pro (demo) — Stripe coming soon");
-                }}
-              >
-                <Zap className="h-4 w-4" /> Upgrade to Pro
+              <Button variant="hero" onClick={handleUpgrade} disabled={paying}>
+                {paying ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" /> Processing…
+                  </>
+                ) : (
+                  <>
+                    <Zap className="h-4 w-4" /> Upgrade to Pro — ₹79/mo
+                  </>
+                )}
               </Button>
             )}
           </div>
@@ -127,31 +155,22 @@ function SubscriptionPage() {
           plan="pro"
           current={isPro}
           highlight
-          onSelect={() => {
-            upgradeToPro(user.id);
-            toast.success("Upgraded to Pro (demo) — Stripe coming soon");
-          }}
+          busy={paying}
+          onSelect={handleUpgrade}
         />
       </div>
 
       <Card className="border-border/60 bg-card/40 p-6">
         <h3 className="font-display text-lg font-semibold">Billing management</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          Invoices, payment methods, and billing history will appear here once
-          payments are connected.
+          Payments are processed securely via Razorpay. Invoices and receipts are
+          emailed to you after each successful payment.
         </p>
-        <div className="mt-4 flex gap-2">
-          <Button variant="outline" disabled>
-            <CreditCard className="h-4 w-4" /> Payment methods
-          </Button>
-          <Button variant="outline" disabled>
-            View invoices
-          </Button>
-        </div>
       </Card>
     </div>
   );
 }
+
 
 const PLAN_DETAILS = {
   free: {
@@ -185,11 +204,13 @@ export function PlanCard({
   plan,
   current,
   highlight,
+  busy,
   onSelect,
 }: {
   plan: "free" | "pro";
   current?: boolean;
   highlight?: boolean;
+  busy?: boolean;
   onSelect?: () => void;
 }) {
   const p = PLAN_DETAILS[plan];
@@ -233,15 +254,22 @@ export function PlanCard({
         <Button
           variant={highlight ? "hero" : "outline"}
           className="mt-7 w-full"
-          disabled={current}
+          disabled={current || busy}
           onClick={onSelect}
         >
-          {current ? "Current plan" : plan === "pro" ? "Upgrade to Pro" : "Switch to Free"}
+          {busy && plan === "pro"
+            ? "Processing…"
+            : current
+              ? "Current plan"
+              : plan === "pro"
+                ? "Upgrade to Pro"
+                : "Switch to Free"}
         </Button>
       )}
     </Card>
   );
 }
+
 
 export function PublicPricing() {
   return (
