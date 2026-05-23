@@ -204,11 +204,13 @@ export function PlanCard({
   plan,
   current,
   highlight,
+  busy,
   onSelect,
 }: {
   plan: "free" | "pro";
   current?: boolean;
   highlight?: boolean;
+  busy?: boolean;
   onSelect?: () => void;
 }) {
   const p = PLAN_DETAILS[plan];
@@ -252,15 +254,22 @@ export function PlanCard({
         <Button
           variant={highlight ? "hero" : "outline"}
           className="mt-7 w-full"
-          disabled={current}
+          disabled={current || busy}
           onClick={onSelect}
         >
-          {current ? "Current plan" : plan === "pro" ? "Upgrade to Pro" : "Switch to Free"}
+          {busy && plan === "pro"
+            ? "Processing…"
+            : current
+              ? "Current plan"
+              : plan === "pro"
+                ? "Upgrade to Pro"
+                : "Switch to Free"}
         </Button>
       )}
     </Card>
   );
 }
+
 
 export function PublicPricing() {
   return (
