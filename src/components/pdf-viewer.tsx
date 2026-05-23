@@ -1,12 +1,10 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { ClientOnly } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 
 type Source = File | Blob | string | null | undefined;
 
-const ClientPdfViewer = lazy(() =>
-  import("./pdf-viewer.client").then((m) => ({ default: m.default })),
-);
+const ClientPdfViewer = lazy(() => import("./pdf-viewer-impl"));
+
 
 
 export function PdfViewer({ source, width = 500, fallback }: { source: Source; width?: number; fallback?: string }) {
