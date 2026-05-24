@@ -1,4 +1,4 @@
-import { createRazorpayOrder, verifyRazorpayPayment } from "./razorpay.functions";
+import { createRazorpayOrder } from "./razorpay.functions";
 
 declare global {
   interface Window {
@@ -47,7 +47,14 @@ function loadRazorpayScript(): Promise<boolean> {
 }
 
 export type CheckoutResult =
-  | { status: "success"; paymentId: string }
+  | {
+      status: "success";
+      payload: {
+        razorpay_order_id: string;
+        razorpay_payment_id: string;
+        razorpay_signature: string;
+      };
+    }
   | { status: "failed"; reason: string }
   | { status: "dismissed" };
 
@@ -73,21 +80,7 @@ export async function startRazorpayCheckout(params: {
       order_id: order.orderId,
       prefill: { email: params.email },
       theme: { color: "#6366f1" },
-      handler: async (response) => {
-        try {
-          const result = await verifyRazorpayPayment({ data: response });
-          if (result.verified) {
-            resolve({ status: "success", paymentId: result.paymentId });
-          } else {
-            resolve({ status: "failed", reason: "Signature verification failed" });
-          }
-        } catch (err) {
-          resolve({
-            status: "failed",
-            reason: err instanceof Error ? err.message : "Verification error",
-          });
-        }
-      },
+      handler: (response) => resolve({ status: "success", payload: response }),
       modal: {
         ondismiss: () => resolve({ status: "dismissed" }),
       },
