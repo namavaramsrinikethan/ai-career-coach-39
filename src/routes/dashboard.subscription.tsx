@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,9 +7,9 @@ import { Progress } from "@/components/ui/progress";
 import { Check, Crown, GraduationCap, Sparkles, CreditCard, Zap, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import {
-  getSubscription,
-  upgradeToPro,
-  downgradeToFree,
+  useSubscription,
+  useActivatePro,
+  useDowngradeToFree,
   PLAN_LIMITS,
 } from "@/lib/subscription";
 import { startRazorpayCheckout } from "@/lib/razorpay";
@@ -22,16 +22,22 @@ export const Route = createFileRoute("/dashboard/subscription")({
 
 function SubscriptionPage() {
   const { user } = useAuth();
-  const [, force] = useState(0);
+  const subQuery = useSubscription();
+  const activatePro = useActivatePro();
+  const downgrade = useDowngradeToFree();
   const [paying, setPaying] = useState(false);
-  useEffect(() => {
-    const h = () => force((x) => x + 1);
-    window.addEventListener("apr:subscription-change", h);
-    return () => window.removeEventListener("apr:subscription-change", h);
-  }, []);
+
   if (!user) return null;
 
-  const sub = getSubscription(user.id);
+  if (subQuery.isLoading || !subQuery.data) {
+    return (
+      <div className="flex items-center justify-center py-24 text-muted-foreground">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const sub = subQuery.data;
   const isPro = sub.plan === "pro";
 
   const handleUpgrade = async () => {
@@ -43,7 +49,7 @@ function SubscriptionPage() {
         email: user.email,
       });
       if (result.status === "success") {
-        upgradeToPro(user.id, result.paymentId);
+        await activatePro.mutateAsync(result.payload);
         toast.success("Welcome to Pro! Your plan is now active.");
       } else if (result.status === "dismissed") {
         toast.message("Payment cancelled");
@@ -102,17 +108,18 @@ function SubscriptionPage() {
                 </Button>
                 <Button
                   variant="ghost"
-                  onClick={() => {
-                    downgradeToFree(user.id);
+                  onClick={async () => {
+                    await downgrade.mutateAsync();
                     toast.success("Switched to Free plan");
                   }}
+                  disabled={downgrade.isPending}
                 >
                   Cancel
                 </Button>
               </>
             ) : (
-              <Button variant="hero" onClick={handleUpgrade} disabled={paying}>
-                {paying ? (
+              <Button variant="hero" onClick={handleUpgrade} disabled={paying || activatePro.isPending}>
+                {paying || activatePro.isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" /> Processing…
                   </>
@@ -146,8 +153,8 @@ function SubscriptionPage() {
         <PlanCard
           plan="free"
           current={!isPro}
-          onSelect={() => {
-            downgradeToFree(user.id);
+          onSelect={async () => {
+            await downgrade.mutateAsync();
             toast.success("Switched to Free plan");
           }}
         />
@@ -155,7 +162,7 @@ function SubscriptionPage() {
           plan="pro"
           current={isPro}
           highlight
-          busy={paying}
+          busy={paying || activatePro.isPending}
           onSelect={handleUpgrade}
         />
       </div>

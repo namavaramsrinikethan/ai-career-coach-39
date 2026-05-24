@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+
 import {
   LayoutDashboard, Plus, History, Bookmark, Settings, Sparkles, Moon, Sun, ArrowLeft, LogOut, CreditCard,
 } from "lucide-react";
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { getSubscription } from "@/lib/subscription";
+import { useSubscription } from "@/lib/subscription";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardGuarded,
@@ -53,16 +53,10 @@ const navItems: NavItem[] = [
 ];
 
 function DashboardLayout() {
-  const { user } = useAuth();
   const { theme, toggle } = useTheme();
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const [, force] = useState(0);
-  useEffect(() => {
-    const h = () => force((x) => x + 1);
-    window.addEventListener("apr:subscription-change", h);
-    return () => window.removeEventListener("apr:subscription-change", h);
-  }, []);
-  const sub = user ? getSubscription(user.id) : null;
+  const subQuery = useSubscription();
+  const sub = subQuery.data ?? null;
   const visibleNavItems = navItems.filter((item) => !item.proOnly || sub?.plan === "pro");
 
   return (

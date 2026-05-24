@@ -1,101 +1,72 @@
-// Client-side subscription + usage tracking.
-// Stripe integration is intentionally NOT wired up yet — these helpers are
-// placeholders that simulate plan state in localStorage, keyed per user.
+// Client-side hook for subscription state — backend is the source of truth.
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import {
+  activateProFn,
+  downgradeToFreeFn,
+  getSubscriptionFn,
+  incrementUsageFn,
+  PLAN_LABEL,
+  PLAN_LIMITS,
+  type Plan,
+} from "./subscription.functions";
+import { useAuth } from "./auth";
 
-export type Plan = "free" | "pro";
+export { PLAN_LABEL, PLAN_LIMITS };
+export type { Plan };
 
-export const PLAN_LIMITS: Record<Plan, number> = {
-  free: 1,
-  pro: 10,
-};
-
-export const PLAN_LABEL: Record<Plan, string> = {
-  free: "Free",
-  pro: "Pro",
-};
-
-type UsageState = {
+export type SubscriptionState = {
   plan: Plan;
-  periodKey: string; // YYYY-MM
   used: number;
-  // Placeholder billing fields for future Stripe wiring
-  subscriptionId?: string | null;
-  currentPeriodEnd?: string | null;
+  limit: number;
+  remaining: number;
+  canAnalyze: boolean;
+  currentPeriodEnd: string | null;
+  periodKey: string;
 };
 
-const KEY = (userId: string) => `apr_sub_v1_${userId}`;
-const monthKey = (d = new Date()) =>
-  `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+export const SUBSCRIPTION_QUERY_KEY = ["subscription"] as const;
 
-const read = (userId: string): UsageState => {
-  if (typeof window === "undefined") {
-    return { plan: "free", periodKey: monthKey(), used: 0 };
-  }
-  try {
-    const raw = localStorage.getItem(KEY(userId));
-    if (raw) {
-      const parsed = JSON.parse(raw) as UsageState;
-      if (parsed.periodKey !== monthKey()) {
-        // Auto-reset on new month
-        const reset = { ...parsed, periodKey: monthKey(), used: 0 };
-        localStorage.setItem(KEY(userId), JSON.stringify(reset));
-        return reset;
-      }
-      return parsed;
-    }
-  } catch {
-    /* noop */
-  }
-  const init: UsageState = { plan: "free", periodKey: monthKey(), used: 0 };
-  try {
-    localStorage.setItem(KEY(userId), JSON.stringify(init));
-  } catch {
-    /* noop */
-  }
-  return init;
-};
-
-const write = (userId: string, state: UsageState) => {
-  try {
-    localStorage.setItem(KEY(userId), JSON.stringify(state));
-    window.dispatchEvent(new CustomEvent("apr:subscription-change"));
-  } catch {
-    /* noop */
-  }
-};
-
-export function getSubscription(userId: string) {
-  const s = read(userId);
-  const limit = PLAN_LIMITS[s.plan];
-  return {
-    ...s,
-    limit,
-    remaining: Math.max(0, limit - s.used),
-    canAnalyze: s.used < limit,
-  };
-}
-
-export function incrementUsage(userId: string) {
-  const s = read(userId);
-  const next = { ...s, used: s.used + 1 };
-  write(userId, next);
-  return next;
-}
-
-/** Activate Pro plan after a successful Razorpay payment. */
-export function upgradeToPro(userId: string, paymentId: string) {
-  const s = read(userId);
-  write(userId, {
-    ...s,
-    plan: "pro",
-    subscriptionId: paymentId,
-    currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+export function useSubscription() {
+  const { user, loading } = useAuth();
+  const getSub = useServerFn(getSubscriptionFn);
+  return useQuery({
+    queryKey: [...SUBSCRIPTION_QUERY_KEY, user?.id ?? null],
+    queryFn: () => getSub(),
+    enabled: !!user && !loading,
+    staleTime: 15_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 }
 
+export function useIncrementUsage() {
+  const inc = useServerFn(incrementUsageFn);
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => inc(),
+    onSuccess: () => qc.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEY }),
+  });
+}
 
-/** Placeholder — would normally call Stripe customer portal. */
-export function downgradeToFree(userId: string) {
-  const s = read(userId);
-  write(userId, { ...s, plan: "free", subscriptionId: null, currentPeriodEnd: null });
+export function useActivatePro() {
+  const activate = useServerFn(activateProFn);
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      razorpay_order_id: string;
+      razorpay_payment_id: string;
+      razorpay_signature: string;
+    }) => activate({ data }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEY }),
+  });
+}
+
+export function useDowngradeToFree() {
+  const downgrade = useServerFn(downgradeToFreeFn);
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => downgrade(),
+    onSuccess: () => qc.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEY }),
+  });
 }

@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { getHistory } from "@/lib/storage";
-import { getSubscription } from "@/lib/subscription";
-import { useAuth } from "@/lib/auth";
+import { useSubscription } from "@/lib/subscription";
 import type { HistoryItem } from "@/lib/types";
 import { ArrowRight, Crown, FileText, Plus, Sparkles, Target, TrendingUp, Zap } from "lucide-react";
 
@@ -15,16 +14,11 @@ export const Route = createFileRoute("/dashboard/")({
 });
 
 function DashboardIndex() {
-  const { user } = useAuth();
   const [items, setItems] = useState<HistoryItem[]>([]);
-  const [, force] = useState(0);
   useEffect(() => {
     setItems(getHistory());
-    const h = () => force((x) => x + 1);
-    window.addEventListener("apr:subscription-change", h);
-    return () => window.removeEventListener("apr:subscription-change", h);
   }, []);
-  const sub = user ? getSubscription(user.id) : null;
+  const sub = useSubscription().data ?? null;
 
   const avgAts = items.length
     ? Math.round(items.reduce((a, i) => a + i.atsScore, 0) / items.length)
