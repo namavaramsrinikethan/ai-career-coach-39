@@ -195,7 +195,7 @@ function NewAnalysis() {
         modifiedResumePdfBase64: modifiedB64Clean,
       };
       saveHistoryItem(item);
-      if (user) incrementUsage(user.id);
+      if (user) await incUsage.mutateAsync().catch(() => undefined);
       clearInterval(stageTimer);
       navigate({ to: "/results/$id", params: { id } });
     } catch (e) {
