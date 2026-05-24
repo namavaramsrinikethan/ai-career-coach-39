@@ -14,7 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      user_subscriptions: {
+        Row: {
+          analyses_used: number
+          created_at: string
+          current_period_end: string | null
+          period_key: string
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analyses_used?: number
+          created_at?: string
+          current_period_end?: string | null
+          period_key?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analyses_used?: number
+          created_at?: string
+          current_period_end?: string | null
+          period_key?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +58,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      subscription_plan: "free" | "pro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +185,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      subscription_plan: ["free", "pro"],
+    },
   },
 } as const
