@@ -16,7 +16,7 @@ import { mockAnalysis } from "@/lib/mock";
 import { normalizeWebhookResponse } from "@/lib/normalize";
 import { setPdfCache, base64ToPdfBlob } from "@/lib/pdf-cache";
 import { RequireAuth, useAuth } from "@/lib/auth";
-import { getSubscription, incrementUsage } from "@/lib/subscription";
+import { useSubscription, useIncrementUsage } from "@/lib/subscription";
 
 export const Route = createFileRoute("/new")({
   component: NewAnalysisGuarded,
@@ -77,6 +77,8 @@ function fileToBase64(file: File): Promise<string> {
 function NewAnalysis() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const subQuery = useSubscription();
+  const incUsage = useIncrementUsage();
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [jobUrl, setJobUrl] = useState("");
@@ -106,10 +108,12 @@ function NewAnalysis() {
     if (!file) return toast.error("Please upload your resume");
     if (!jobUrl.trim() && !jobDesc.trim()) return toast.error("Add a job URL or description");
     if (user) {
-      const fresh = getSubscription(user.id);
-      if (!fresh.canAnalyze) {
+      // Refetch latest from backend before allowing analysis to start.
+      const fresh = await subQuery.refetch();
+      const data = fresh.data;
+      if (!data || !data.canAnalyze) {
         toast.error(
-          fresh.plan === "free"
+          data?.plan === "free"
             ? "Free plan limit reached. Upgrade to Pro for 10 analyses/month."
             : "You've used all analyses for this month."
         );
