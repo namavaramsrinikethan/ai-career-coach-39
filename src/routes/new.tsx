@@ -110,7 +110,7 @@ function NewAnalysis() {
       if (!fresh.canAnalyze) {
         toast.error(
           fresh.plan === "free"
-            ? "Free plan limit reached. Upgrade to Pro for 100 analyses/month."
+            ? "Free plan limit reached. Upgrade to Pro for 10 analyses/month."
             : "You've used all analyses for this month."
         );
         navigate({ to: "/dashboard/subscription" });
