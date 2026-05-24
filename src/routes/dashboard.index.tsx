@@ -93,7 +93,7 @@ function DashboardIndex() {
           </div>
           {!sub.canAnalyze && sub.plan === "free" && (
             <div className="mt-4 rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm">
-              You've used your free analysis for this month. Upgrade to Pro for 100 analyses/month.
+              You've used your free analysis for this month. Upgrade to Pro for 10 analyses/month.
             </div>
           )}
         </Card>
