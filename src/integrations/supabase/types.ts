@@ -19,6 +19,7 @@ export type Database = {
           analyses_used: number
           created_at: string
           current_period_end: string | null
+          last_payment_at: string | null
           period_key: string
           plan: Database["public"]["Enums"]["subscription_plan"]
           razorpay_order_id: string | null
@@ -30,6 +31,7 @@ export type Database = {
           analyses_used?: number
           created_at?: string
           current_period_end?: string | null
+          last_payment_at?: string | null
           period_key?: string
           plan?: Database["public"]["Enums"]["subscription_plan"]
           razorpay_order_id?: string | null
@@ -41,6 +43,7 @@ export type Database = {
           analyses_used?: number
           created_at?: string
           current_period_end?: string | null
+          last_payment_at?: string | null
           period_key?: string
           plan?: Database["public"]["Enums"]["subscription_plan"]
           razorpay_order_id?: string | null
