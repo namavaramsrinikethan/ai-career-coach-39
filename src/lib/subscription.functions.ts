@@ -147,7 +147,18 @@ export const activateProFn = createServerFn({ method: "POST" })
     if (!valid) throw new Error("Payment signature verification failed");
 
     await ensureRow(context.userId);
-    const periodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    // If this exact payment was already processed (e.g. by the webhook), no-op.
+    const { data: already } = await supabaseAdmin
+      .from("user_subscriptions")
+      .select("*")
+      .eq("user_id", context.userId)
+      .eq("razorpay_payment_id", data.razorpay_payment_id)
+      .maybeSingle();
+    if (already) return toResponse(already as unknown as SubRow);
+
+    const now = new Date();
+    const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
     const { data: row, error } = await supabaseAdmin
       .from("user_subscriptions")
       .update({
@@ -155,15 +166,28 @@ export const activateProFn = createServerFn({ method: "POST" })
         current_period_end: periodEnd,
         razorpay_payment_id: data.razorpay_payment_id,
         razorpay_order_id: data.razorpay_order_id,
+        last_payment_at: now.toISOString(),
         period_key: monthKey(),
         analyses_used: 0,
       })
       .eq("user_id", context.userId)
       .select("*")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) {
+      // Unique violation on payment_id ⇒ webhook beat us. Re-read and return.
+      if ((error as { code?: string }).code === "23505") {
+        const { data: row2 } = await supabaseAdmin
+          .from("user_subscriptions")
+          .select("*")
+          .eq("user_id", context.userId)
+          .single();
+        if (row2) return toResponse(row2 as unknown as SubRow);
+      }
+      throw new Error(error.message);
+    }
     return toResponse(row as unknown as SubRow);
   });
+
 
 export const downgradeToFreeFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
