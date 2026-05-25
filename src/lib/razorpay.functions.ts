@@ -8,6 +8,7 @@ export const createRazorpayOrder = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
       receipt: z.string().min(1).max(40),
+      userId: z.string().min(1).max(64),
     }).parse,
   )
   .handler(async ({ data }) => {
@@ -29,6 +30,7 @@ export const createRazorpayOrder = createServerFn({ method: "POST" })
         currency: "INR",
         receipt: data.receipt,
         payment_capture: 1,
+        notes: { user_id: data.userId },
       }),
     });
 
@@ -52,6 +54,7 @@ export const createRazorpayOrder = createServerFn({ method: "POST" })
       keyId,
     };
   });
+
 
 export const verifyRazorpayPayment = createServerFn({ method: "POST" })
   .inputValidator(
