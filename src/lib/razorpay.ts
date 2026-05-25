@@ -68,7 +68,8 @@ export async function startRazorpayCheckout(params: {
   }
 
   const receipt = `pro_${params.userId.slice(0, 8)}_${Date.now().toString(36)}`.slice(0, 40);
-  const order = await createRazorpayOrder({ data: { receipt } });
+  const order = await createRazorpayOrder({ data: { receipt, userId: params.userId } });
+
 
   return new Promise<CheckoutResult>((resolve) => {
     const rzp = new window.Razorpay!({
