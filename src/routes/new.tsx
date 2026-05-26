@@ -277,13 +277,16 @@ function NewAnalysis() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="url">Job / Internship URL</Label>
+              <Label htmlFor="url">Unstop Job / Internship URL</Label>
               <Input
                 id="url"
-                placeholder="https://company.com/careers/frontend-intern"
+                placeholder="Paste your Unstop job or internship link here"
                 value={jobUrl}
                 onChange={(e) => setJobUrl(e.target.value)}
               />
+              <p className="text-xs text-muted-foreground">
+                Best results are currently available for Unstop job links. Support for LinkedIn and Naukri links is in beta and may not work consistently.
+              </p>
             </div>
 
             <div className="space-y-2">
