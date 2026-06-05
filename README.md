@@ -1,6 +1,6 @@
 # AI Resume Analyzer SaaS
 
-A full-stack AI-powered resume optimization platform that analyzes resumes against real internship and job URL's, calculates ATS compatibility,
+A full-stack AI-powered resume optimization SaaS platform that analyzes resumes against real internship and job URL's, calculates ATS compatibility,
 identifies missing skills, and generates a fully AI-enhanced resume with downloadable PDF reports.
 
 Upload your Resume PDF + paste a job URL → receive ATS scores, skill-gap analysis, project recommendations, and a side-by-side comparison between your 
