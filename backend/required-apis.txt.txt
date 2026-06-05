@@ -1,0 +1,86 @@
+REQUIRED APIS & SERVICES
+
+1. Groq API
+Purpose:
+- Fast AI inference
+- Resume analysis
+- Skills extraction
+- ATS optimization
+
+Website:
+https://console.groq.com/keys
+
+
+2. Mistral AI API
+Purpose:
+- AI-generated summaries
+- Resume improvement suggestions
+- Structured AI outputs
+
+Website:
+https://admin.mistral.ai/organization/api-keys
+
+
+3. Supabase
+Purpose:
+- User authentication
+- Database storage
+- Subscription tracking
+- Usage tracking
+
+Website:
+https://supabase.com/
+
+
+4. Railway
+Purpose:
+- Hosting n8n backend workflows
+- Public production deployment
+
+Website:
+https://railway.com/deploy/n8n
+
+
+5. PDFShift
+Purpose:
+- PDF report generation
+- Resume export functionality
+
+Website:
+https://pdfshift.io/
+
+
+6. Razorpay (Optional)
+Purpose:
+- Payment gateway integration
+- Subscription payments
+
+Website:
+https://razorpay.com/
+
+
+7. Lovable AI
+Purpose:
+- Frontend UI
+- Authentication pages
+- Dashboard
+- User interaction layer
+
+Website:
+https://lovable.dev/
+
+
+8. n8n
+Purpose:
+- Workflow automation
+- AI orchestration
+- Backend logic
+
+Website:
+https://n8n.io/
+
+
+IMPORTANT:
+- API keys are NOT included.
+- Buyers must use their own API credentials.
+- Never expose secret keys publicly.
